@@ -1,0 +1,12 @@
+{
+  "hash": "e6c10ee9972d2b855a18c278cf5e28a6",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"my_data_platform\"\nformat: \n    html:\n        number-sections: true\n        html-table-processing: none\njupyter: my_data_platform # uv run python -m ipykernel install --user --name my_data_platform\necho: false\nexecute:\n  freeze: auto  # re-render only when source changes\n---\n\n# Executive Summary\n\nThis document summarises the my_data_platform ...\n\nOpinionated guide to best practices set up of open source data platform with best data engineering practices\n\n## Key info\n\n-   Repository name: my_data_platform\n-   Author: Actuarist AI\n-   Repository location: git@github.com:actuaristai/my_data_platform.git\n\n",
+    "supporting": [
+      "data_product_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
