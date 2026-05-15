@@ -153,7 +153,6 @@ default_gateway: local_gateway   # safe default — never MotherDuck by accident
 | `just run` | local_gateway | prod | DuckLake on disk, full incremental run |
 | `just stage` | motherduck | dev | Isolated `*__dev` schemas on MotherDuck |
 | `just deploy` | motherduck | prod | Promotes dev → prod on MotherDuck |
-| `just plan` | local_gateway | prod | Preview only, no apply |
 
 ---
 
