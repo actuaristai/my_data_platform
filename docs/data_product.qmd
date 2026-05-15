@@ -1,0 +1,24 @@
+---
+title: "my_data_platform"
+format: 
+    html:
+        number-sections: true
+        html-table-processing: none
+jupyter: my_data_platform # uv run python -m ipykernel install --user --name my_data_platform
+echo: false
+execute:
+  freeze: auto  # re-render only when source changes
+---
+
+# Executive Summary
+
+This document summarises the my_data_platform ...
+
+Opinionated guide to best practices set up of open source data platform with best data engineering practices
+
+## Key info
+
+-   Repository name: my_data_platform
+-   Author: Actuarist AI
+-   Repository location: git@github.com:actuaristai/my_data_platform.git
+

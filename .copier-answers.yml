@@ -1,0 +1,9 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 1.4.1
+_src_path: git@github.com:actuaristai/template.git
+email: human@actuarist.ai
+full_name: Actuarist AI
+project_name: my_data_platform
+project_short_description: Opinionated guide to best practices set up of open source
+    data platform with best data engineering practices
+remote_repository: git@github.com:actuaristai/my_data_platform.git
