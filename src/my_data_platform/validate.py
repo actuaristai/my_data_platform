@@ -6,8 +6,8 @@ import sys
 from loguru import logger
 
 from validations.checks import (validate_bronze_matches,
+                                validate_bronze_seeds,
                                 validate_gold_surface_stats,
-                                validate_raw_matches,
                                 validate_silver_matches)
 from validations.connection import get_connection
 
@@ -15,7 +15,7 @@ from validations.connection import get_connection
 def main() -> None:
     """Run all layer validations. Exit 1 if any check fails."""
     con = get_connection()
-    checks = [validate_raw_matches(con),
+    checks = [validate_bronze_seeds(con),
               validate_bronze_matches(con),
               validate_silver_matches(con),
               validate_gold_surface_stats(con)]
