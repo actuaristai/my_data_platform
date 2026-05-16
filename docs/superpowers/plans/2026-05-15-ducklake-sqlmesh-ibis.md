@@ -599,10 +599,8 @@ def test_download_tour_matches_concatenates_years(mock_get, tmp_path):
 
 @patch('my_data_platform.ingest.requests.get')
 def test_download_tour_matches_skips_404(mock_get, tmp_path):
-    mock_get.side_effect = [
-        MagicMock(status_code=404),
-        MagicMock(status_code=200, content=_csv_bytes([MATCH_ROW])),
-    ]
+    mock_get.side_effect = [MagicMock(status_code=404),
+                            MagicMock(status_code=200, content=_csv_bytes([MATCH_ROW]))]
     out = tmp_path / 'atp_matches.csv'
 
     download_tour_matches('atp', 'https://example.com', 2023, 2024, out)
@@ -652,6 +650,24 @@ import requests
 from loguru import logger
 
 from conf.config import conf
+
+def main() -> None:
+    """Entry point: download all raw tennis data to data/01_raw/."""
+    raw_dir = Path('data/01_raw')
+    raw_dir.mkdir(parents=True, exist_ok=True)
+
+    year_start: int = conf['tennis.year_start']
+    year_end: int = conf['tennis.year_end']
+    tours: list[str] = conf['tennis.tours']
+    urls = {'atp': conf['tennis.atp_url'], 'wta': conf['tennis.wta_url']}
+
+    for tour in tours:
+        base = urls[tour]
+        download_tour_matches(tour, base, year_start, year_end, raw_dir / f'{tour}_matches.csv')
+        download_tour_players(tour, base, raw_dir / f'{tour}_players.csv')
+        download_tour_rankings(tour, base, year_start, year_end, raw_dir / f'{tour}_rankings.csv')
+
+    logger.info('Ingest complete.')
 
 
 def _concat_to_csv(contents: list[bytes], output_path: Path) -> int:
@@ -705,26 +721,6 @@ def download_tour_rankings(tour: str, base_url: str, year_start: int, year_end: 
         raise RuntimeError(f'No rankings data found for {tour} {year_start}–{year_end}')
     total = _concat_to_csv(contents, output_path)
     logger.info(f'Saved {output_path} ({total:,} rows)')
-
-
-def main() -> None:
-    """Entry point: download all raw tennis data to data/01_raw/."""
-    raw_dir = Path('data/01_raw')
-    raw_dir.mkdir(parents=True, exist_ok=True)
-
-    year_start: int = conf['tennis.year_start']
-    year_end: int = conf['tennis.year_end']
-    tours: list[str] = conf['tennis.tours']
-    urls = {'atp': conf['tennis.atp_url'], 'wta': conf['tennis.wta_url']}
-
-    for tour in tours:
-        base = urls[tour]
-        download_tour_matches(tour, base, year_start, year_end, raw_dir / f'{tour}_matches.csv')
-        download_tour_players(tour, base, raw_dir / f'{tour}_players.csv')
-        download_tour_rankings(tour, base, year_start, year_end, raw_dir / f'{tour}_rankings.csv')
-
-    logger.info('Ingest complete.')
-
 
 if __name__ == '__main__':
     main()
@@ -2172,6 +2168,10 @@ _GOLD_TABLES = ['player_surface_stats',
                 'tournament_stats']
 
 
+def main() -> None:
+    """Entry point for just publish."""
+    publish_gold_tables()
+
 def publish_gold_tables(board_path: str | None = None) -> None:
     """Read each gold table and write to the configured pins board as Parquet."""
     path = board_path or conf['pins.board_path']
@@ -2187,10 +2187,6 @@ def publish_gold_tables(board_path: str | None = None) -> None:
     con.disconnect()
     logger.info('Publish complete.')
 
-
-def main() -> None:
-    """Entry point for just publish."""
-    publish_gold_tables()
 
 
 if __name__ == '__main__':
