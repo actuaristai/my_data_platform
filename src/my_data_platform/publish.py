@@ -2,9 +2,8 @@
 from __future__ import annotations
 
 import pins
-from loguru import logger
-
 from conf.config import conf
+from loguru import logger
 from validations.connection import get_connection
 
 _GOLD_TABLES = ['player_surface_stats',

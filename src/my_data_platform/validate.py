@@ -4,11 +4,12 @@ from __future__ import annotations
 import sys
 
 from loguru import logger
-
-from validations.checks import (validate_bronze_matches,
-                                validate_bronze_seeds,
-                                validate_gold_surface_stats,
-                                validate_silver_matches)
+from validations.checks import (
+    validate_bronze_matches,
+    validate_bronze_seeds,
+    validate_gold_surface_stats,
+    validate_silver_matches,
+)
 from validations.connection import get_connection
 
 
