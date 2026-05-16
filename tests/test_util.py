@@ -1,8 +1,6 @@
 """Tests for shared model utilities."""
 from unittest.mock import MagicMock
 
-import ibis
-
 from models._util import GATEWAY_CATALOG, MATCHES_SCHEMA, PLAYERS_SCHEMA, RANKINGS_SCHEMA, _build_table
 
 

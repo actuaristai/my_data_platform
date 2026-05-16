@@ -1,9 +1,7 @@
 """Tests for ATP/WTA data ingestion."""
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import polars as pl
-
 from my_data_platform.ingest import download_tour_matches, download_tour_players, download_tour_rankings
 
 
