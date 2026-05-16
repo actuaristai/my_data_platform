@@ -1,7 +1,7 @@
 """Pointblank validation chains for each layer of the data lake."""
 from __future__ import annotations
 
-import ibis
+import ibis  # noqa: TC002
 import pointblank as pb
 
 from validations.connection import get_connection

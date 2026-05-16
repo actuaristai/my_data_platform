@@ -1,10 +1,9 @@
 """Ibis connection factory for validation queries."""
 import ibis
-
 from conf.config import conf
 
 
-def get_connection(read_only: bool = True) -> ibis.BaseBackend:
+def get_connection(read_only: bool = True) -> ibis.BaseBackend:  # noqa: FBT001, FBT002
     """Return an Ibis DuckDB connection with the local DuckLake catalog attached.
 
     Catalog path is read from conf/parameters.toml [ducklake] catalog_path.
