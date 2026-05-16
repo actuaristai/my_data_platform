@@ -12,7 +12,7 @@ from models._util import BRONZE_MATCHES_SCHEMA, GATEWAY_CATALOG, _build_table
        description='Cleaned matches: date cast, surface normalised, null scores removed.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Cast tourney_date to DATE, normalise surface, drop rows with no score."""
-    from ibis import _
+    from ibis import _  # noqa: PLC0415
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
 

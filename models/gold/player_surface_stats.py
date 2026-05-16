@@ -12,7 +12,7 @@ from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
        description='Win rate, wins, losses, and matches played per player per surface.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Calculate win/loss record and win_rate per player, tour, and surface."""
-    from ibis import _
+    from ibis import _  # noqa: PLC0415
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
 

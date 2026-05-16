@@ -11,7 +11,7 @@ from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
        description='Match count, avg duration, and distinct winner count per tournament.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Aggregate matches by tourney_id, name, surface, and year."""
-    from ibis import _
+    from ibis import _  # noqa: PLC0415
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
 

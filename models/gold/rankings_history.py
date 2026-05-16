@@ -13,7 +13,7 @@ from models._util import GATEWAY_CATALOG, SILVER_RANKINGS_SCHEMA, _build_table
        description='Weekly ranking snapshots with best-ever rank per player.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Pass through silver rankings and add career_best_rank window column."""
-    from ibis import _
+    from ibis import _  # noqa: PLC0415
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
 

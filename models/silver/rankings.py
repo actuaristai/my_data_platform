@@ -14,7 +14,7 @@ _BRONZE_RANKINGS_SCHEMA: dict[str, str] = {**RANKINGS_SCHEMA, 'tour': 'string'}
        description='Weekly rankings with ranking_date cast to DATE.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Cast ranking_date from YYYYMMDD int to DATE."""
-    from ibis import _
+    from ibis import _  # noqa: PLC0415
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
 

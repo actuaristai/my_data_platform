@@ -12,7 +12,7 @@ from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
        description='H2H records: wins for player1 vs player2 (player1_id < player2_id).')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Count wins for each canonical (player1, player2) pair where player1_id < player2_id."""
-    from ibis import _
+    from ibis import _  # noqa: PLC0415
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
 
