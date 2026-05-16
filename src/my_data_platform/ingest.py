@@ -32,7 +32,7 @@ def main() -> None:
 
 def _concat_to_csv(contents: list[bytes], output_path: Path) -> int:
     """Concatenate CSV byte blobs in-memory via polars and write to output_path."""
-    result = pl.concat([pl.read_csv(io.BytesIO(c)) for c in contents])
+    result = pl.concat([pl.read_csv(io.BytesIO(c), infer_schema_length=0) for c in contents])
     result.write_csv(output_path)
     return len(result)
 
@@ -66,10 +66,14 @@ def download_tour_players(tour: str, base_url: str, output_path: Path) -> None:
 
 
 def download_tour_rankings(tour: str, base_url: str, year_start: int, year_end: int, output_path: Path) -> None:
-    """Download and concatenate per-year rankings CSVs into a single file."""
+    """Download and concatenate decade rankings CSVs into a single file.
+
+    JeffSackmann's repo uses decade files (e.g. atp_rankings_10s.csv, atp_rankings_20s.csv).
+    """
+    decades = sorted({(year // 10) * 10 % 100 for year in range(year_start, year_end + 1)})
     contents = []
-    for year in range(year_start, year_end + 1):
-        url = f'{base_url}/{tour}_rankings_{year}s.csv'
+    for decade in decades:
+        url = f'{base_url}/{tour}_rankings_{decade:02d}s.csv'
         logger.info(f'Downloading {url}')
         resp = requests.get(url, timeout=30)
         if resp.status_code == 404:

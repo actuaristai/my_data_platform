@@ -1,0 +1,10 @@
+MODEL (name raw.wta_players,
+       kind SEED (path '../../data/01_raw/wta_players.csv'),
+       columns (player_id INT,
+                first_name TEXT,
+                last_name TEXT,
+                hand TEXT,
+                dob DOUBLE,
+                ioc TEXT,
+                height DOUBLE,
+                wikidata_id TEXT));

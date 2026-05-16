@@ -17,11 +17,11 @@ gateways:
     connection:
       type: motherduck
       catalogs:
-        my_lakehouse: "md:my_lakehouse"
+        my_lakehouse: my_lakehouse
       token: "{{ env_var('MOTHERDUCK_TOKEN') }}"
     state_connection:
       type: motherduck
-      database: "md:sqlmesh_state"
+      database: sqlmesh_state
 
 default_gateway: local_gateway
 
