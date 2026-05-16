@@ -1,10 +1,9 @@
 """Bronze matches: combine ATP + WTA into a single table with tour label."""
-import ibis
 from sqlmesh.core.macros import MacroEvaluator
 from sqlmesh.core.model import model
 from sqlmesh.core.model.kind import ModelKindName
 
-from models._util import GATEWAY_CATALOG, MATCHES_SCHEMA, _build_table
+from models._util import BRONZE_MATCHES_SCHEMA, MATCHES_SCHEMA, _read_csv_sql
 
 
 @model('bronze.matches',
@@ -12,14 +11,14 @@ from models._util import GATEWAY_CATALOG, MATCHES_SCHEMA, _build_table
        kind={'name': ModelKindName.INCREMENTAL_BY_UNIQUE_KEY, 'unique_key': ['tourney_id', 'match_num', 'tour']},
        description='Combined ATP and WTA matches with tour label.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
-    """Union atp_matches and wta_matches, tagging each row with its tour."""
-    gateway = evaluator.gateway or 'local_gateway'
-    catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
+    """Union ATP and WTA match CSVs, tagging each row with its tour."""
+    if evaluator.runtime_stage == 'loading':
+        cols = ', '.join(f'NULL AS "{k}"' for k in BRONZE_MATCHES_SCHEMA)
+        return f'SELECT {cols} WHERE FALSE'
 
-    atp = _build_table(evaluator, catalog, 'atp_matches', 'raw', MATCHES_SCHEMA)
-    wta = _build_table(evaluator, catalog, 'wta_matches', 'raw', MATCHES_SCHEMA)
-
-    return ibis.union(atp.mutate(tour=ibis.literal('ATP')),
-                      wta.mutate(tour=ibis.literal('WTA')),
-                      distinct=False) \
-        .to_sql(dialect='duckdb')
+    match_cols = ', '.join(f'"{k}"' for k in MATCHES_SCHEMA)
+    atp_sql = (f"SELECT {match_cols}, 'ATP' AS \"tour\""
+               f" FROM {_read_csv_sql('data/01_raw/atp_matches.csv', MATCHES_SCHEMA)}")
+    wta_sql = (f"SELECT {match_cols}, 'WTA' AS \"tour\""
+               f" FROM {_read_csv_sql('data/01_raw/wta_matches.csv', MATCHES_SCHEMA)}")
+    return f'{atp_sql} UNION ALL {wta_sql}'

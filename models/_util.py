@@ -2,6 +2,27 @@
 import ibis
 from sqlmesh.core.macros import MacroEvaluator
 
+_IBIS_TO_DUCKDB: dict[str, str] = {
+    'string': 'VARCHAR',
+    'int32': 'INTEGER',
+    'int64': 'BIGINT',
+    'float64': 'DOUBLE',
+    'date': 'DATE',
+}
+
+
+def _read_csv_sql(csv_path: str, schema: dict[str, str]) -> str:
+    """SQL subquery that reads a CSV and casts each column to the declared type.
+
+    Uses ALL_VARCHAR=TRUE then TRY_CAST so mixed-type columns (e.g. winner_seed
+    which can contain 'Q') become NULL rather than raising an error.
+    """
+    casts = ', '.join(
+        f"TRY_CAST(\"{k}\" AS {_IBIS_TO_DUCKDB.get(v, 'VARCHAR')}) AS \"{k}\""
+        for k, v in schema.items()
+    )
+    return f"(SELECT {casts} FROM read_csv('{csv_path}', ALL_VARCHAR=TRUE))"
+
 GATEWAY_CATALOG: dict[str, str] = {'local_gateway': 'my_lakehouse',
                                    'motherduck': 'my_lakehouse'}
 
