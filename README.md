@@ -233,7 +233,7 @@ ATTACH 'ducklake:data/catalog.ducklake' AS my_lakehouse;
 ## Design Decisions
 
 - **`is_sql=True` is mandatory** — returning DataFrames from Ibis models breaks SQLmesh's column-level lineage
-- **Bronze = SQL, not Python** — SEED models and UNION ALL are simpler and more reliable than Python ibis for the raw→bronze step; no schema inference needed
-- **No raw layer** — SEEDs live in `bronze` directly; a separate raw schema added complexity with no benefit
+- **Bronze** 
+ - raw layer set up in ducklake database
+ - SQL for SEED models and UNION ALL are simpler and more reliable than Python ibis for the raw→bronze step; no schema inference needed
 - **`default_gateway: local_gateway`** — never MotherDuck by accident; cloud is always explicit
-- **DVC removed** — DuckLake replaces DVC for data versioning; pins replaces DVC remote for artefact sharing
