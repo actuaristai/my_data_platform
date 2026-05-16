@@ -1254,7 +1254,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     wta = _build_table(evaluator, catalog, 'wta_matches', 'raw', MATCHES_SCHEMA)
 
     return ibis.union(atp.mutate(tour=ibis.literal('ATP')), wta.mutate(tour=ibis.literal('WTA')),
-                      distinct=False).to_sql(dialect='duckdb')
+                      distinct=False) \
+        .to_sql(dialect='duckdb')
 ```
 
 - [ ] **Step 4: Create models/bronze/players.py**
@@ -1282,7 +1283,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     wta = _build_table(evaluator, catalog, 'wta_players', 'raw', PLAYERS_SCHEMA)
 
     return ibis.union(atp.mutate(tour=ibis.literal('ATP')), wta.mutate(tour=ibis.literal('WTA')),
-                      distinct=False).to_sql(dialect='duckdb')
+                      distinct=False) \
+        .to_sql(dialect='duckdb')
 ```
 
 - [ ] **Step 5: Create models/bronze/rankings.py**
@@ -1310,7 +1312,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     wta = _build_table(evaluator, catalog, 'wta_rankings', 'raw', RANKINGS_SCHEMA)
 
     return ibis.union(atp.mutate(tour=ibis.literal('ATP')), wta.mutate(tour=ibis.literal('WTA')),
-                      distinct=False).to_sql(dialect='duckdb')
+                      distinct=False) \
+        .to_sql(dialect='duckdb')
 ```
 
 - [ ] **Step 6: Run SQLmesh test**
@@ -1538,11 +1541,14 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     bronze = _build_table(evaluator, catalog, 'matches', 'bronze', BRONZE_MATCHES_SCHEMA)
 
-    surface_clean = bronze.surface.lower().cases(('hard', 'Hard'), ('clay', 'Clay'), ('grass', 'Grass'),
-                                                 ('carpet', 'Carpet'),
-                                                 else_=bronze.surface)
-    result = (bronze.filter(bronze.score.notnull()).mutate(
-        tourney_date=bronze.tourney_date.cast('string').to_timestamp('%Y%m%d').date(), surface=surface_clean))
+    surface_clean = bronze.surface \
+        .lower() \
+        .cases(('hard', 'Hard'), ('clay', 'Clay'), ('grass', 'Grass'),
+               ('carpet', 'Carpet'), else_=bronze.surface)
+    result = bronze \
+        .filter(bronze.score.notnull()) \
+        .mutate(tourney_date=bronze.tourney_date.cast('string').to_timestamp('%Y%m%d').date(),
+                surface=surface_clean)
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1573,8 +1579,9 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     bronze = _build_table(evaluator, catalog, 'players', 'bronze', _BRONZE_PLAYERS_SCHEMA)
 
-    result = (bronze.filter(bronze.player_id.notnull()).mutate(full_name=(bronze.first_name + ibis.literal(' ') +
-                                                                          bronze.last_name).strip()))
+    result = bronze \
+        .filter(bronze.player_id.notnull()) \
+        .mutate(full_name=(bronze.first_name + ibis.literal(' ') + bronze.last_name).strip())
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1844,20 +1851,24 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     matches = _build_table(evaluator, catalog, 'matches', 'silver', SILVER_MATCHES_SCHEMA)
 
-    wins = (matches.group_by(['winner_id', 'tour',
-                              'surface']).aggregate(wins=matches.match_num.count()).rename(player_id='winner_id'))
-    losses = (matches.group_by(['loser_id', 'tour',
-                                'surface']).aggregate(losses=matches.match_num.count()).rename(player_id='loser_id'))
+    wins = matches \
+        .group_by(['winner_id', 'tour', 'surface']) \
+        .aggregate(wins=matches.match_num.count()) \
+        .rename(player_id='winner_id')
+    losses = matches \
+        .group_by(['loser_id', 'tour', 'surface']) \
+        .aggregate(losses=matches.match_num.count()) \
+        .rename(player_id='loser_id')
     joined = wins.outer_join(losses, ['player_id', 'tour', 'surface'])
     resolved = joined.mutate(player_id=ibis.coalesce(wins.player_id, losses.player_id),
                              tour=ibis.coalesce(wins.tour, losses.tour),
                              surface=ibis.coalesce(wins.surface, losses.surface),
                              wins=wins.wins.fillna(0).cast('int64'),
                              losses=losses.losses.fillna(0).cast('int64'))
-    result = resolved.mutate(matches_played=ibis._.wins + ibis._.losses,
-                             win_rate=(ibis._.wins.cast('float64') / (ibis._.wins + ibis._.losses)))[[
-                                 'player_id', 'tour', 'surface', 'wins', 'losses', 'matches_played', 'win_rate'
-                             ]]
+    result = resolved \
+        .mutate(matches_played=ibis._.wins + ibis._.losses,
+                win_rate=(ibis._.wins.cast('float64') / (ibis._.wins + ibis._.losses))) \
+        [['player_id', 'tour', 'surface', 'wins', 'losses', 'matches_played', 'win_rate']]
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1887,10 +1898,11 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     canonical = matches.mutate(player1_id=ibis.least(matches.winner_id, matches.loser_id),
                                player2_id=ibis.greatest(matches.winner_id, matches.loser_id),
                                player1_won=(matches.winner_id < matches.loser_id).cast('int64'))
-    result = (canonical.group_by(['player1_id', 'player2_id', 'tour']).aggregate(
-        player1_wins=canonical.player1_won.sum(),
-        total_matches=canonical.match_num.count()).mutate(
-            player2_wins=ibis._.total_matches - ibis._.player1_wins))
+    result = canonical \
+        .group_by(['player1_id', 'player2_id', 'tour']) \
+        .aggregate(player1_wins=canonical.player1_won.sum(),
+                   total_matches=canonical.match_num.count()) \
+        .mutate(player2_wins=ibis._.total_matches - ibis._.player1_wins)
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1947,10 +1959,11 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     matches = _build_table(evaluator, catalog, 'matches', 'silver', SILVER_MATCHES_SCHEMA)
 
     matches_with_year = matches.mutate(tourney_year=matches.tourney_date.year())
-    result = (matches_with_year.group_by(['tourney_id', 'tourney_name', 'surface', 'tour', 'tourney_year'
-                                          ]).aggregate(matches_played=matches_with_year.match_num.count(),
-                                                       avg_match_minutes=matches_with_year.minutes.mean(),
-                                                       distinct_winners=matches_with_year.winner_id.nunique()))
+    result = matches_with_year \
+        .group_by(['tourney_id', 'tourney_name', 'surface', 'tour', 'tourney_year']) \
+        .aggregate(matches_played=matches_with_year.match_num.count(),
+                   avg_match_minutes=matches_with_year.minutes.mean(),
+                   distinct_winners=matches_with_year.winner_id.nunique())
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -2204,12 +2217,10 @@ from loguru import logger
 from conf.config import conf
 from validations.connection import get_connection
 
-_GOLD_TABLES = [
-    'player_surface_stats',
-    'head_to_head',
-    'rankings_history',
-    'tournament_stats',
-]
+_GOLD_TABLES = ['player_surface_stats',
+                'head_to_head',
+                'rankings_history',
+                'tournament_stats']
 
 
 def publish_gold_tables(board_path: str | None = None) -> None:
