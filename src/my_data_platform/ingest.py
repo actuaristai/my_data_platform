@@ -6,9 +6,8 @@ from pathlib import Path
 
 import polars as pl
 import requests
-from loguru import logger
-
 from conf.config import conf
+from loguru import logger
 
 
 def main() -> None:
@@ -30,6 +29,7 @@ def main() -> None:
     logger.info('Ingest complete.')
 
 
+_HTTP_NOT_FOUND = 404
 _MATCHES_RENAME: dict[str, str] = {'w_SvGms': 'w_SvGm', 'l_SvGms': 'l_SvGm'}
 _PLAYERS_RENAME: dict[str, str] = {'name_first': 'first_name', 'name_last': 'last_name'}
 _RANKINGS_RENAME: dict[str, str] = {'rank': 'ranking', 'player': 'player_id'}
@@ -53,13 +53,14 @@ def download_tour_matches(tour: str, base_url: str, year_start: int, year_end: i
         url = f'{base_url}/{tour}_matches_{year}.csv'
         logger.info(f'Downloading {url}')
         resp = requests.get(url, timeout=30)
-        if resp.status_code == 404:
+        if resp.status_code == _HTTP_NOT_FOUND:
             logger.warning(f'Not found (skipping): {url}')
             continue
         resp.raise_for_status()
         contents.append(resp.content)
     if not contents:
-        raise RuntimeError(f'No match data found for {tour} {year_start}–{year_end}')
+        msg = f'No match data found for {tour} {year_start}-{year_end}'
+        raise RuntimeError(msg)
     total = _concat_to_csv(contents, output_path, rename=_MATCHES_RENAME)
     logger.info(f'Saved {output_path} ({total:,} rows)')
 
@@ -87,13 +88,14 @@ def download_tour_rankings(tour: str, base_url: str, year_start: int, year_end: 
         url = f'{base_url}/{tour}_rankings_{decade:02d}s.csv'
         logger.info(f'Downloading {url}')
         resp = requests.get(url, timeout=30)
-        if resp.status_code == 404:
+        if resp.status_code == _HTTP_NOT_FOUND:
             logger.warning(f'Not found (skipping): {url}')
             continue
         resp.raise_for_status()
         contents.append(resp.content)
     if not contents:
-        raise RuntimeError(f'No rankings data found for {tour} {year_start}–{year_end}')
+        msg = f'No rankings data found for {tour} {year_start}-{year_end}'
+        raise RuntimeError(msg)
     total = _concat_to_csv(contents, output_path, rename=_RANKINGS_RENAME)
     logger.info(f'Saved {output_path} ({total:,} rows)')
 
