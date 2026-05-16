@@ -917,13 +917,12 @@ MODEL (name raw.wta_players,
 - [ ] **Step 5: Create models/raw/atp_rankings.sql**
 
 ```sql
-MODEL (
-    name raw.atp_rankings,
-    kind SEED (path 'data/01_raw/atp_rankings.csv'),
-    columns (ranking_date INT,
-             ranking INT,
-             player_id INT,
-             points DOUBLE));
+MODEL (name raw.atp_rankings,
+       kind SEED (path 'data/01_raw/atp_rankings.csv'),
+       columns (ranking_date INT,
+                ranking INT,
+                player_id INT,
+                points DOUBLE));
 ```
 
 - [ ] **Step 6: Create models/raw/wta_rankings.sql**
