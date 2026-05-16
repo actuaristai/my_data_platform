@@ -1,5 +1,5 @@
 [build-system]
-requires = [ "hatchling",]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
@@ -8,48 +8,56 @@ version = "0.1.0"
 description = "Opinionated guide to best practices set up of open source data platform with best data engineering practices"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "dynaconf>=3.2.10",
-    "ipykernel>=6.29.5",
-    "loguru>=0.7.3",
-    "pytest>=8.3.5",
-    "pytest-cov>=6.0.0",
-    "ruff>=0.11.2",
-    "nbclient>=0.10.2",
-    "nbformat>=5.10.4",
-    "quartodoc>=0.9.1",
-    "griffe<1.0.0",
-    "toml>=0.10.2",
-    "typer>=0.15.2",
-    "autopep8>=2.3.2",
-    "commitizen>=4.4.1",
-     "dvc>=3.59.1",
-
-]
+dependencies = ["duckdb>=1.2.0",
+                 "dynaconf>=3.2.10",
+                 "griffe<1.0.0",
+                 "ibis-framework[duckdb]>=11.0.0",
+                 "ipykernel>=6.29.5",
+                 "loguru>=0.7.3",
+                 "nbclient>=0.10.2",
+                 "nbformat>=5.10.4",
+                 "pins>=0.9.1",
+                 "pointblank>=0.17.0",
+                 "polars>=1.0.0",
+                 "pytest>=8.3.5",
+                 "pytest-cov>=6.0.0",
+                 "quartodoc>=0.9.1",
+                 "requests>=2.32.0",
+                 "ruff>=0.11.2",
+                 "sqlmesh[duckdb]>=0.228.2",
+                 "toml>=0.10.2",
+                 "typer>=0.15.2",
+                 "autopep8>=2.3.2",
+                 "commitizen>=4.4.1",
+                 "yapf>=0.43.0"]
 
 [[project.authors]]
 name = "Actuarist AI"
 email = "human@actuarist.ai"
 
 [dependency-groups]
-lint = [ "ruff",]
-test = [ "pytest", "pytest-cov", "dynaconf", "typer", "requests", "loguru", "toml",]
-dev = [ "ipykernel", "nbclient", "nbformat", "ruff", "autopep8", "commitizen", "dvc", "pytest", "pytest-cov", "quartodoc", "toml", "typer",]
+lint = ["ruff"]
+test = ["pytest", "pytest-cov", "dynaconf", "typer", "requests", "loguru",
+    "toml", "ibis-framework[duckdb]", "polars", "pointblank"]
+dev = ["ipykernel", "nbclient", "nbformat", "ruff", "autopep8", "commitizen",
+        "pytest", "pytest-cov", "quartodoc", "toml", "typer",
+        "sqlmesh[duckdb]", "ibis-framework[duckdb]", "polars", "pins", "pointblank",
+        "requests", "yapf"]
 
 [tool.uv]
 default-groups = "all"
 
 [tool.ruff]
-src = [ "src/my_data_platform", "tests", "conf",]
+src = ["src/my_data_platform", "tests", "conf", "models", "validations"]
 line-length = 120
-exclude = [ ".git", ".ruff_cache", ".venv", "__pypackages__", "__init__.py",]
+exclude = [".git", ".ruff_cache", ".venv", "__pypackages__", "__init__.py"]
 
 [tool.autopep8]
 max_line_length = 120
 
 [tool.ruff.lint]
-select = [ "ALL",]
-ignore = [ ]
+select = ["ALL"]
+ignore = []
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -57,6 +65,8 @@ convention = "google"
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/my_data_platform", "conf"]
-

@@ -1,0 +1,1 @@
+"""SQLmesh Ibis models."""

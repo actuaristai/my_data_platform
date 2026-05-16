@@ -1,0 +1,164 @@
+test_silver_matches_casts_date_normalises_surface_filters_null_scores:
+  model: silver.matches
+  inputs:
+    bronze.matches:
+      columns:
+        tourney_id: TEXT
+        tourney_name: TEXT
+        surface: TEXT
+        draw_size: INT
+        tourney_level: TEXT
+        tourney_date: INT
+        match_num: INT
+        tour: TEXT
+        winner_id: INT
+        winner_seed: DOUBLE
+        winner_entry: TEXT
+        winner_name: TEXT
+        winner_hand: TEXT
+        winner_ht: DOUBLE
+        winner_ioc: TEXT
+        winner_age: DOUBLE
+        loser_id: INT
+        loser_seed: DOUBLE
+        loser_entry: TEXT
+        loser_name: TEXT
+        loser_hand: TEXT
+        loser_ht: DOUBLE
+        loser_ioc: TEXT
+        loser_age: DOUBLE
+        score: TEXT
+        best_of: INT
+        round: TEXT
+        minutes: DOUBLE
+        w_ace: DOUBLE
+        w_df: DOUBLE
+        w_svpt: DOUBLE
+        w_1stIn: DOUBLE
+        w_1stWon: DOUBLE
+        w_2ndWon: DOUBLE
+        w_SvGm: DOUBLE
+        w_bpSaved: DOUBLE
+        w_bpFaced: DOUBLE
+        l_ace: DOUBLE
+        l_df: DOUBLE
+        l_svpt: DOUBLE
+        l_1stIn: DOUBLE
+        l_1stWon: DOUBLE
+        l_2ndWon: DOUBLE
+        l_SvGm: DOUBLE
+        l_bpSaved: DOUBLE
+        l_bpFaced: DOUBLE
+        winner_rank: DOUBLE
+        winner_rank_points: DOUBLE
+        loser_rank: DOUBLE
+        loser_rank_points: DOUBLE
+      rows:
+        - tourney_id: "2024-540"
+          match_num: 1
+          tour: "ATP"
+          surface: "grass"
+          tourney_date: 20240701
+          score: "6-3 6-4"
+          winner_id: 104925
+          loser_id: 105453
+          tourney_name: "Wimbledon"
+          tourney_level: "G"
+          draw_size: 128
+          best_of: 5
+          round: "F"
+          winner_seed: ~
+          winner_entry: ~
+          winner_name: "Novak Djokovic"
+          winner_hand: "R"
+          winner_ht: 188.0
+          winner_ioc: "SRB"
+          winner_age: 37.1
+          loser_seed: ~
+          loser_entry: ~
+          loser_name: "Andy Murray"
+          loser_hand: "R"
+          loser_ht: 190.0
+          loser_ioc: "GBR"
+          loser_age: 37.3
+          minutes: 135.0
+          w_ace: 8.0
+          w_df: 2.0
+          w_svpt: 85.0
+          w_1stIn: 55.0
+          w_1stWon: 42.0
+          w_2ndWon: 20.0
+          w_SvGm: 12.0
+          w_bpSaved: 3.0
+          w_bpFaced: 4.0
+          l_ace: 3.0
+          l_df: 4.0
+          l_svpt: 80.0
+          l_1stIn: 50.0
+          l_1stWon: 32.0
+          l_2ndWon: 15.0
+          l_SvGm: 11.0
+          l_bpSaved: 1.0
+          l_bpFaced: 6.0
+          winner_rank: 2.0
+          winner_rank_points: 7500.0
+          loser_rank: 50.0
+          loser_rank_points: 1000.0
+        - tourney_id: "2024-540"
+          match_num: 2
+          tour: "ATP"
+          surface: "Grass"
+          tourney_date: 20240701
+          score: ~
+          winner_id: 105223
+          loser_id: 106421
+          tourney_name: "Wimbledon"
+          tourney_level: "G"
+          draw_size: 128
+          best_of: 5
+          round: "SF"
+          winner_seed: ~
+          winner_entry: ~
+          winner_name: "Carlos Alcaraz"
+          winner_hand: "R"
+          winner_ht: 185.0
+          winner_ioc: "ESP"
+          winner_age: 21.1
+          loser_seed: ~
+          loser_entry: ~
+          loser_name: "Jannik Sinner"
+          loser_hand: "R"
+          loser_ht: 188.0
+          loser_ioc: "ITA"
+          loser_age: 22.9
+          minutes: ~
+          w_ace: ~
+          w_df: ~
+          w_svpt: ~
+          w_1stIn: ~
+          w_1stWon: ~
+          w_2ndWon: ~
+          w_SvGm: ~
+          w_bpSaved: ~
+          w_bpFaced: ~
+          l_ace: ~
+          l_df: ~
+          l_svpt: ~
+          l_1stIn: ~
+          l_1stWon: ~
+          l_2ndWon: ~
+          l_SvGm: ~
+          l_bpSaved: ~
+          l_bpFaced: ~
+          winner_rank: ~
+          winner_rank_points: ~
+          loser_rank: ~
+          loser_rank_points: ~
+  outputs:
+    query:
+      partial: true
+      rows:
+        - tourney_id: "2024-540"
+          match_num: 1
+          surface: "Grass"
+          tourney_date: "2024-07-01"

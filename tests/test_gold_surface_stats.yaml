@@ -1,0 +1,181 @@
+test_player_surface_stats_calculates_win_rate:
+  model: gold.player_surface_stats
+  inputs:
+    silver.matches:
+      columns:
+        tourney_id: TEXT
+        tourney_name: TEXT
+        surface: TEXT
+        draw_size: INT
+        tourney_level: TEXT
+        tourney_date: DATE
+        match_num: INT
+        tour: TEXT
+        winner_id: INT
+        winner_seed: DOUBLE
+        winner_entry: TEXT
+        winner_name: TEXT
+        winner_hand: TEXT
+        winner_ht: DOUBLE
+        winner_ioc: TEXT
+        winner_age: DOUBLE
+        loser_id: INT
+        loser_seed: DOUBLE
+        loser_entry: TEXT
+        loser_name: TEXT
+        loser_hand: TEXT
+        loser_ht: DOUBLE
+        loser_ioc: TEXT
+        loser_age: DOUBLE
+        score: TEXT
+        best_of: INT
+        round: TEXT
+        minutes: DOUBLE
+        w_ace: DOUBLE
+        w_df: DOUBLE
+        w_svpt: DOUBLE
+        w_1stIn: DOUBLE
+        w_1stWon: DOUBLE
+        w_2ndWon: DOUBLE
+        w_SvGm: DOUBLE
+        w_bpSaved: DOUBLE
+        w_bpFaced: DOUBLE
+        l_ace: DOUBLE
+        l_df: DOUBLE
+        l_svpt: DOUBLE
+        l_1stIn: DOUBLE
+        l_1stWon: DOUBLE
+        l_2ndWon: DOUBLE
+        l_SvGm: DOUBLE
+        l_bpSaved: DOUBLE
+        l_bpFaced: DOUBLE
+        winner_rank: DOUBLE
+        winner_rank_points: DOUBLE
+        loser_rank: DOUBLE
+        loser_rank_points: DOUBLE
+      rows:
+        - winner_id: 104925
+          loser_id: 105453
+          surface: "Grass"
+          tour: "ATP"
+          tourney_id: "2024-540"
+          match_num: 1
+          tourney_date: "2024-07-01"
+          score: "6-3 6-4"
+          tourney_name: "Wimbledon"
+          tourney_level: "G"
+          draw_size: 128
+          best_of: 5
+          round: "F"
+          winner_seed: ~
+          winner_entry: ~
+          winner_name: "Novak Djokovic"
+          winner_hand: "R"
+          winner_ht: 188.0
+          winner_ioc: "SRB"
+          winner_age: 37.1
+          loser_seed: ~
+          loser_entry: ~
+          loser_name: "Andy Murray"
+          loser_hand: "R"
+          loser_ht: 190.0
+          loser_ioc: "GBR"
+          loser_age: 37.3
+          minutes: 135.0
+          w_ace: 8.0
+          w_df: 2.0
+          w_svpt: 85.0
+          w_1stIn: 55.0
+          w_1stWon: 42.0
+          w_2ndWon: 20.0
+          w_SvGm: 12.0
+          w_bpSaved: 3.0
+          w_bpFaced: 4.0
+          l_ace: 3.0
+          l_df: 4.0
+          l_svpt: 80.0
+          l_1stIn: 50.0
+          l_1stWon: 32.0
+          l_2ndWon: 15.0
+          l_SvGm: 11.0
+          l_bpSaved: 1.0
+          l_bpFaced: 6.0
+          winner_rank: 2.0
+          winner_rank_points: 7500.0
+          loser_rank: 50.0
+          loser_rank_points: 1000.0
+        - winner_id: 104925
+          loser_id: 200999
+          surface: "Grass"
+          tour: "ATP"
+          tourney_id: "2024-540"
+          match_num: 2
+          tourney_date: "2024-07-01"
+          score: "6-2 6-1"
+          tourney_name: "Wimbledon"
+          tourney_level: "G"
+          draw_size: 128
+          best_of: 5
+          round: "SF"
+          winner_seed: ~
+          winner_entry: ~
+          winner_name: "Novak Djokovic"
+          winner_hand: "R"
+          winner_ht: 188.0
+          winner_ioc: "SRB"
+          winner_age: 37.1
+          loser_seed: ~
+          loser_entry: ~
+          loser_name: "Someone Else"
+          loser_hand: "R"
+          loser_ht: 185.0
+          loser_ioc: "USA"
+          loser_age: 25.0
+          minutes: 80.0
+          w_ace: 5.0
+          w_df: 1.0
+          w_svpt: 70.0
+          w_1stIn: 50.0
+          w_1stWon: 40.0
+          w_2ndWon: 15.0
+          w_SvGm: 10.0
+          w_bpSaved: 2.0
+          w_bpFaced: 2.0
+          l_ace: 1.0
+          l_df: 3.0
+          l_svpt: 55.0
+          l_1stIn: 30.0
+          l_1stWon: 20.0
+          l_2ndWon: 10.0
+          l_SvGm: 7.0
+          l_bpSaved: 0.0
+          l_bpFaced: 8.0
+          winner_rank: 2.0
+          winner_rank_points: 7500.0
+          loser_rank: 100.0
+          loser_rank_points: 500.0
+  outputs:
+    query:
+      partial: true
+      rows:
+        - player_id: 104925
+          surface: "Grass"
+          tour: "ATP"
+          wins: 2
+          losses: 0
+          matches_played: 2
+          win_rate: 1.0
+        - player_id: 105453
+          surface: "Grass"
+          tour: "ATP"
+          wins: 0
+          losses: 1
+          matches_played: 1
+          win_rate: 0.0
+        - player_id: 200999
+          surface: "Grass"
+          tour: "ATP"
+          wins: 0
+          losses: 1
+          matches_played: 1
+          win_rate: 0.0
