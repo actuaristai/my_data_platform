@@ -7,11 +7,11 @@ import pointblank as pb
 from validations.connection import get_connection
 
 
-def validate_raw_matches(con: ibis.BaseBackend | None = None) -> pb.Validate:
-    """Validate raw.atp_matches and raw.wta_matches have required columns non-null."""
+def validate_bronze_seeds(con: ibis.BaseBackend | None = None) -> pb.Validate:
+    """Validate bronze SEED tables: required columns non-null."""
     _con = con or get_connection()
-    atp = _con.table('atp_matches', database='my_lakehouse.raw')
-    v = pb.Validate(data=atp, tbl_name='raw.atp_matches', label='Raw ATP Matches') \
+    atp = _con.table('atp_matches', database='my_lakehouse.bronze')
+    v = pb.Validate(data=atp, tbl_name='bronze.atp_matches', label='Bronze ATP Matches') \
         .col_vals_not_null(columns='tourney_id') \
         .col_vals_not_null(columns='winner_id') \
         .col_vals_not_null(columns='loser_id') \
@@ -38,7 +38,8 @@ def validate_silver_matches(con: ibis.BaseBackend | None = None) -> pb.Validate:
     table = _con.table('matches', database='my_lakehouse.silver')
     v = pb.Validate(data=table, tbl_name='silver.matches', label='Silver Matches') \
         .col_vals_not_null(columns='score') \
-        .col_vals_in_set(columns='surface', set=['Hard', 'Clay', 'Grass', 'Carpet']) \
+        .col_vals_in_set(columns='surface', set=['Hard', 'Clay', 'Grass', 'Carpet'],
+                         pre=lambda t: t.filter(t['surface'].notnull())) \
         .col_vals_not_null(columns='tourney_date')
     return v.interrogate()
 

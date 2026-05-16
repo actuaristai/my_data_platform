@@ -16,7 +16,7 @@ def test_publish_gold_tables_writes_all_four_tables(mock_board_folder, mock_get_
 
     assert mock_board.pin_write.call_count == 4
     pin_names = [call.args[1] for call in mock_board.pin_write.call_args_list]
-    assert 'gold/player_surface_stats' in pin_names
-    assert 'gold/head_to_head' in pin_names
-    assert 'gold/rankings_history' in pin_names
-    assert 'gold/tournament_stats' in pin_names
+    assert 'gold__player_surface_stats' in pin_names
+    assert 'gold__head_to_head' in pin_names
+    assert 'gold__rankings_history' in pin_names
+    assert 'gold__tournament_stats' in pin_names

@@ -1,8 +1,6 @@
-MODEL (
-  name bronze.matches,
-  kind FULL,
-  description 'Combined ATP and WTA matches with tour label.'
-);
+MODEL (name bronze.matches,
+       kind FULL,
+       description 'Combined ATP and WTA matches with tour label.');
 
 SELECT *, 'ATP' AS tour FROM bronze.atp_matches
 UNION ALL
