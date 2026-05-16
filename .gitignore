@@ -95,4 +95,4 @@ terraform/terraform.tfstate.backup
 .dvc/tmp/
 
 # personal claude settings
-.claude/settings.local.json
+.claude
