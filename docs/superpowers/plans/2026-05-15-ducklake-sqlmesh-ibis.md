@@ -6,7 +6,7 @@
 
 **Architecture:** SQLmesh manages incremental execution and column-level lineage via a local DuckLake catalog (`data/catalog.ducklake`), with a MotherDuck gateway for staging (`dev` environment) and production. All Ibis models use `is_sql=True` returning `.to_sql(dialect='duckdb')` to preserve column-level lineage. pins handles raw data download from GitHub and gold layer publishing for consumers.
 
-**Tech Stack:** Python 3.13, uv, SQLmesh, DuckLake, ibis-framework[duckdb], pins, pointblank, dynaconf, requests, just, ruff, pytest
+**Tech Stack:** Python 3.13, uv, SQLmesh, DuckLake, ibis-framework[duckdb], polars, pins, pointblank, dynaconf, requests, just, ruff, pytest
 
 ---
 
@@ -82,6 +82,7 @@ dependencies = ["duckdb>=1.2.0",
                  "nbformat>=5.10.4",
                  "pins>=0.9.1",
                  "pointblank>=0.17.0",
+                 "polars>=1.0.0",
                  "pytest>=8.3.5",
                  "pytest-cov>=6.0.0",
                  "quartodoc>=0.9.1",
@@ -100,10 +101,10 @@ email = "human@actuarist.ai"
 [dependency-groups]
 lint = ["ruff"]
 test = ["pytest", "pytest-cov", "dynaconf", "typer", "requests", "loguru",
-    "toml", "ibis-framework[duckdb]", "pointblank"]
+    "toml", "ibis-framework[duckdb]", "polars", "pointblank"]
 dev = ["ipykernel", "nbclient", "nbformat", "ruff", "autopep8", "commitizen",
         "pytest", "pytest-cov", "quartodoc", "toml", "typer",
-        "sqlmesh[duckdb]", "ibis-framework[duckdb]", "pins", "pointblank",
+        "sqlmesh[duckdb]", "ibis-framework[duckdb]", "polars", "pins", "pointblank",
         "requests"]
 
 [tool.uv]
@@ -564,22 +565,16 @@ git commit -m "feat: add shared model utilities and ibis schemas"
 
 ```python
 # tests/test_ingest.py
-import csv
-import io
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import ibis
+import polars as pl
 
 from my_data_platform.ingest import download_tour_matches, download_tour_players, download_tour_rankings
 
 
 def _csv_bytes(rows: list[dict]) -> bytes:
-    buf = io.StringIO()
-    writer = csv.DictWriter(buf, fieldnames=list(rows[0]))
-    writer.writeheader()
-    writer.writerows(rows)
-    return buf.getvalue().encode()
+    return pl.DataFrame(rows).write_csv().encode()
 
 
 MATCH_ROW = {'tourney_id': '2024-540', 'tourney_name': 'Wimbledon', 'surface': 'Grass',
@@ -596,9 +591,9 @@ def test_download_tour_matches_concatenates_years(mock_get, tmp_path):
 
     download_tour_matches('atp', 'https://example.com', 2024, 2024, out)
 
-    t = ibis.read_csv(str(out))
-    assert t.count().execute() == 1
-    assert t.filter(t['tourney_id'] == '2024-540').count().execute() == 1
+    df = pl.read_csv(out)
+    assert len(df) == 1
+    assert df['tourney_id'][0] == '2024-540'
     mock_get.assert_called_once_with('https://example.com/atp_matches_2024.csv', timeout=30)
 
 
@@ -612,8 +607,7 @@ def test_download_tour_matches_skips_404(mock_get, tmp_path):
 
     download_tour_matches('atp', 'https://example.com', 2023, 2024, out)
 
-    t = ibis.read_csv(str(out))
-    assert t.count().execute() == 1
+    assert len(pl.read_csv(out)) == 1
 
 
 @patch('my_data_platform.ingest.requests.get')
@@ -623,8 +617,7 @@ def test_download_tour_players(mock_get, tmp_path):
 
     download_tour_players('atp', 'https://example.com', out)
 
-    t = ibis.read_csv(str(out))
-    assert t.filter(t['first_name'] == 'Novak').count().execute() == 1
+    assert pl.read_csv(out)['first_name'][0] == 'Novak'
 
 
 @patch('my_data_platform.ingest.requests.get')
@@ -634,8 +627,7 @@ def test_download_tour_rankings(mock_get, tmp_path):
 
     download_tour_rankings('atp', 'https://example.com', 2024, 2024, out)
 
-    t = ibis.read_csv(str(out))
-    assert t.filter(t['ranking'] == 1).count().execute() == 1
+    assert pl.read_csv(out)['ranking'][0] == 1
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -652,10 +644,10 @@ Expected: `ImportError: cannot import name 'download_tour_matches'`
 """Download ATP/WTA tennis CSVs from GitHub into data/01_raw/."""
 from __future__ import annotations
 
-import tempfile
+import io
 from pathlib import Path
 
-import ibis
+import polars as pl
 import requests
 from loguru import logger
 
@@ -663,18 +655,10 @@ from conf.config import conf
 
 
 def _concat_to_csv(contents: list[bytes], output_path: Path) -> int:
-    """Union a list of CSV byte blobs and write to output_path via ibis/duckdb."""
-    con = ibis.duckdb.connect()
-    with tempfile.TemporaryDirectory() as tmpdir:
-        parts = []
-        for i, content in enumerate(contents):
-            p = Path(tmpdir) / f'part_{i}.csv'
-            p.write_bytes(content)
-            parts.append(con.read_csv(str(p)))
-        result = ibis.union(*parts) if len(parts) > 1 else parts[0]
-        total = result.count().execute()
-        result.to_csv(str(output_path))
-    return total
+    """Concatenate CSV byte blobs in-memory via polars and write to output_path."""
+    result = pl.concat([pl.read_csv(io.BytesIO(c)) for c in contents])
+    result.write_csv(output_path)
+    return len(result)
 
 
 def download_tour_matches(tour: str, base_url: str, year_start: int, year_end: int, output_path: Path) -> None:
