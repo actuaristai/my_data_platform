@@ -17,11 +17,11 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     matches = _build_table(evaluator, catalog, 'matches', 'silver', SILVER_MATCHES_SCHEMA)
 
-    matches_with_year = matches.mutate(tourney_year=_.tourney_date.year())
+    matches_with_year = matches.mutate(tourney_year=_['tourney_date'].year())
     result = matches_with_year \
         .group_by(['tourney_id', 'tourney_name', 'surface', 'tour', 'tourney_year']) \
-        .aggregate(matches_played=_.match_num.count(),
-                   avg_match_minutes=_.minutes.mean(),
-                   distinct_winners=_.winner_id.nunique())
+        .aggregate(matches_played=_['match_num'].count(),
+                   avg_match_minutes=_['minutes'].mean(),
+                   distinct_winners=_['winner_id'].nunique())
 
     return result.to_sql(dialect='duckdb')

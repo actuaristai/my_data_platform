@@ -22,7 +22,7 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     bronze = _build_table(evaluator, catalog, 'players', 'bronze', _BRONZE_PLAYERS_SCHEMA)
 
     result = bronze \
-        .filter(_.player_id.notnull()) \
-        .mutate(full_name=(_.first_name + ibis.literal(' ') + _.last_name).strip())
+        .filter(_['player_id'].notnull()) \
+        .mutate(full_name=(_['first_name'] + ibis.literal(' ') + _['last_name']).strip())
 
     return result.to_sql(dialect='duckdb')

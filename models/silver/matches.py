@@ -19,12 +19,12 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     bronze = _build_table(evaluator, catalog, 'matches', 'bronze', BRONZE_MATCHES_SCHEMA)
 
     result = bronze \
-        .filter(_.score.notnull()) \
-        .mutate(tourney_date=_.tourney_date.cast('string').as_timestamp('%Y%m%d').date(),
-                surface=_.surface.lower().cases(('hard', 'Hard'),
-                                                ('clay', 'Clay'),
-                                                ('grass', 'Grass'),
-                                                ('carpet', 'Carpet'),
-                                                else_=_.surface))
+        .filter(_['score'].notnull()) \
+        .mutate(tourney_date=_['tourney_date'].cast('string').as_timestamp('%Y%m%d').date(),
+                surface=_['surface'].lower().cases(('hard', 'Hard'),
+                                                   ('clay', 'Clay'),
+                                                   ('grass', 'Grass'),
+                                                   ('carpet', 'Carpet'),
+                                                   else_=_['surface']))
 
     return result.to_sql(dialect='duckdb')

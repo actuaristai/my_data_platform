@@ -18,7 +18,7 @@ def _read_csv_sql(csv_path: str, schema: dict[str, str]) -> str:
     which can contain 'Q') become NULL rather than raising an error.
     """
     casts = ', '.join(
-        f"TRY_CAST(\"{k}\" AS {_IBIS_TO_DUCKDB.get(v, 'VARCHAR')}) AS \"{k}\""
+        f'TRY_CAST("{k}" AS {_IBIS_TO_DUCKDB.get(v, "VARCHAR")}) AS "{k}"'
         for k, v in schema.items()
     )
     return f"(SELECT {casts} FROM read_csv('{csv_path}', ALL_VARCHAR=TRUE))"

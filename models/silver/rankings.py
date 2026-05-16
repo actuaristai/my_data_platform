@@ -20,6 +20,6 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     bronze = _build_table(evaluator, catalog, 'rankings', 'bronze', _BRONZE_RANKINGS_SCHEMA)
 
-    result = bronze.mutate(ranking_date=_.ranking_date.cast('string').as_timestamp('%Y%m%d').date())
+    result = bronze.mutate(ranking_date=_['ranking_date'].cast('string').as_timestamp('%Y%m%d').date())
 
     return result.to_sql(dialect='duckdb')

@@ -20,6 +20,6 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     rankings = _build_table(evaluator, catalog, 'rankings', 'silver', SILVER_RANKINGS_SCHEMA)
 
     career_window = ibis.window(group_by=['player_id', 'tour'], order_by='ranking_date')
-    result = rankings.mutate(career_best_rank=_.ranking.min().over(career_window))
+    result = rankings.mutate(career_best_rank=_['ranking'].min().over(career_window))
 
     return result.to_sql(dialect='duckdb')
