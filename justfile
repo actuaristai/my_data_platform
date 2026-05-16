@@ -18,7 +18,7 @@ help:
 
 # Run pipeline locally (DuckLake on disk, incremental)
 run:
-    mkdir -p data/storage data/01_raw data/pins_board
+    New-Item -ItemType Directory -Force -Path data/storage, data/01_raw, data/pins_board | Out-Null
     uv run sqlmesh --gateway local_gateway plan --auto-apply
 
 # Run pipeline on MotherDuck dev environment (isolated *__dev schemas)
@@ -66,7 +66,7 @@ docs: _docs-build
 # --- Init (run once after cloning) ---
 
 init-project: init-env init-pre-commit
-    mkdir -p data/01_raw data/02_bronze data/03_silver data/04_gold data/storage data/pins_board
+    New-Item -ItemType Directory -Force -Path data/01_raw, data/02_bronze, data/03_silver, data/04_gold, data/storage, data/pins_board | Out-Null
 
 init-env:
     uv sync
