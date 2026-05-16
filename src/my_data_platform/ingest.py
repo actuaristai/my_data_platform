@@ -30,9 +30,18 @@ def main() -> None:
     logger.info('Ingest complete.')
 
 
-def _concat_to_csv(contents: list[bytes], output_path: Path) -> int:
+_MATCHES_RENAME: dict[str, str] = {'w_SvGms': 'w_SvGm', 'l_SvGms': 'l_SvGm'}
+_PLAYERS_RENAME: dict[str, str] = {'name_first': 'first_name', 'name_last': 'last_name'}
+_RANKINGS_RENAME: dict[str, str] = {'rank': 'ranking', 'player': 'player_id'}
+
+
+def _concat_to_csv(contents: list[bytes], output_path: Path,
+                   rename: dict[str, str] | None = None) -> int:
     """Concatenate CSV byte blobs in-memory via polars and write to output_path."""
-    result = pl.concat([pl.read_csv(io.BytesIO(c), infer_schema_length=0) for c in contents])
+    frames = [pl.read_csv(io.BytesIO(c), infer_schema_length=0) for c in contents]
+    result = pl.concat(frames)
+    if rename:
+        result = result.rename({k: v for k, v in rename.items() if k in result.columns})
     result.write_csv(output_path)
     return len(result)
 
@@ -51,7 +60,7 @@ def download_tour_matches(tour: str, base_url: str, year_start: int, year_end: i
         contents.append(resp.content)
     if not contents:
         raise RuntimeError(f'No match data found for {tour} {year_start}–{year_end}')
-    total = _concat_to_csv(contents, output_path)
+    total = _concat_to_csv(contents, output_path, rename=_MATCHES_RENAME)
     logger.info(f'Saved {output_path} ({total:,} rows)')
 
 
@@ -61,7 +70,9 @@ def download_tour_players(tour: str, base_url: str, output_path: Path) -> None:
     logger.info(f'Downloading {url}')
     resp = requests.get(url, timeout=30)
     resp.raise_for_status()
-    output_path.write_bytes(resp.content)
+    df = pl.read_csv(io.BytesIO(resp.content), infer_schema_length=0)
+    df = df.rename({k: v for k, v in _PLAYERS_RENAME.items() if k in df.columns})
+    df.write_csv(output_path)
     logger.info(f'Saved {output_path}')
 
 
@@ -83,7 +94,7 @@ def download_tour_rankings(tour: str, base_url: str, year_start: int, year_end: 
         contents.append(resp.content)
     if not contents:
         raise RuntimeError(f'No rankings data found for {tour} {year_start}–{year_end}')
-    total = _concat_to_csv(contents, output_path)
+    total = _concat_to_csv(contents, output_path, rename=_RANKINGS_RENAME)
     logger.info(f'Saved {output_path} ({total:,} rows)')
 
 
