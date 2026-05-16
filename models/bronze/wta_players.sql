@@ -1,16 +1,10 @@
-MODEL (
-  name bronze.wta_players,
-  kind SEED (
-    path '../../data/01_raw/wta_players.csv'
-  ),
-  columns (
-    player_id INT,
-    first_name VARCHAR,
-    last_name VARCHAR,
-    hand VARCHAR,
-    dob DOUBLE,
-    ioc VARCHAR,
-    height DOUBLE,
-    wikidata_id VARCHAR
-  )
-);
+MODEL (name bronze.wta_players,
+  kind SEED (path '../../data/01_raw/wta_players.csv'),
+  columns (player_id INT,
+           first_name VARCHAR,
+           last_name VARCHAR,
+           hand VARCHAR,
+           dob DOUBLE,
+           ioc VARCHAR,
+           height DOUBLE,
+           wikidata_id VARCHAR));
