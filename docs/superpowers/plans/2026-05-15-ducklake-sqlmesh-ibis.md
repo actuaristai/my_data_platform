@@ -536,13 +536,11 @@ SILVER_RANKINGS_SCHEMA = ibis.Schema({
 })
 
 
-def _build_table(
-    evaluator: MacroEvaluator,
-    catalog: str,
-    table: str,
-    database: str,
-    fallback_schema: ibis.Schema,
-) -> ibis.Table:
+def _build_table(evaluator: MacroEvaluator,
+                 catalog: str,
+                 table: str,
+                 database: str,
+                 fallback_schema: ibis.Schema) -> ibis.Table:
     """Return an Ibis unbound table, reusing SQLMesh's connection at runtime.
 
     During the loading stage the engine adapter is unavailable, so fallback_schema
@@ -620,9 +618,7 @@ def test_download_tour_matches_concatenates_years(mock_get, tmp_path):
     df = pd.read_csv(out)
     assert len(df) == 1
     assert df.iloc[0]['tourney_id'] == '2024-540'
-    mock_get.assert_called_once_with(
-        'https://example.com/atp_matches_2024.csv', timeout=30
-    )
+    mock_get.assert_called_once_with('https://example.com/atp_matches_2024.csv', timeout=30)
 
 
 @patch('my_data_platform.ingest.requests.get')
@@ -685,13 +681,11 @@ from loguru import logger
 from conf.config import conf
 
 
-def download_tour_matches(
-    tour: str,
-    base_url: str,
-    year_start: int,
-    year_end: int,
-    output_path: Path,
-) -> None:
+def download_tour_matches(tour: str,
+                          base_url: str,
+                          year_start: int,
+                          year_end: int,
+                          output_path: Path) -> None:
     """Download and concatenate per-year match CSVs into a single file."""
     frames = []
     for year in range(year_start, year_end + 1):
@@ -719,13 +713,11 @@ def download_tour_players(tour: str, base_url: str, output_path: Path) -> None:
     logger.info(f'Saved {output_path}')
 
 
-def download_tour_rankings(
-    tour: str,
-    base_url: str,
-    year_start: int,
-    year_end: int,
-    output_path: Path,
-) -> None:
+def download_tour_rankings(tour: str,
+                           base_url: str,
+                           year_start: int,
+                           year_end: int,
+                           output_path: Path) -> None:
     """Download and concatenate per-year rankings CSVs into a single file."""
     frames = []
     for year in range(year_start, year_end + 1):
@@ -1256,13 +1248,11 @@ from sqlmesh.core.model import model
 from models._util import GATEWAY_CATALOG, MATCHES_SCHEMA, _build_table
 
 
-@model(
-    'bronze.matches',
-    is_sql=True,
-    kind='INCREMENTAL_BY_UNIQUE_KEY',
-    unique_key=['tourney_id', 'match_num', 'tour'],
-    description='Combined ATP and WTA matches with tour label.',
-)
+@model('bronze.matches',
+       is_sql=True,
+       kind='INCREMENTAL_BY_UNIQUE_KEY',
+       unique_key=['tourney_id', 'match_num', 'tour'],
+       description='Combined ATP and WTA matches with tour label.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Union atp_matches and wta_matches, tagging each row with its tour."""
     gateway = evaluator.gateway or 'local_gateway'
@@ -1271,11 +1261,9 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     atp = _build_table(evaluator, catalog, 'atp_matches', 'raw', MATCHES_SCHEMA)
     wta = _build_table(evaluator, catalog, 'wta_matches', 'raw', MATCHES_SCHEMA)
 
-    return ibis.union(
-        atp.mutate(tour=ibis.literal('ATP')),
-        wta.mutate(tour=ibis.literal('WTA')),
-        distinct=False,
-    ).to_sql(dialect='duckdb')
+    return ibis.union(atp.mutate(tour=ibis.literal('ATP')),
+                      wta.mutate(tour=ibis.literal('WTA')),
+                      distinct=False).to_sql(dialect='duckdb')
 ```
 
 - [ ] **Step 4: Create models/bronze/players.py**
@@ -1289,13 +1277,11 @@ from sqlmesh.core.model import model
 from models._util import GATEWAY_CATALOG, PLAYERS_SCHEMA, _build_table
 
 
-@model(
-    'bronze.players',
-    is_sql=True,
-    kind='INCREMENTAL_BY_UNIQUE_KEY',
-    unique_key=['player_id', 'tour'],
-    description='Combined ATP and WTA player rosters with tour label.',
-)
+@model('bronze.players',
+       is_sql=True,
+       kind='INCREMENTAL_BY_UNIQUE_KEY',
+       unique_key=['player_id', 'tour'],
+       description='Combined ATP and WTA player rosters with tour label.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Union atp_players and wta_players, tagging each row with its tour."""
     gateway = evaluator.gateway or 'local_gateway'
@@ -1304,11 +1290,9 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     atp = _build_table(evaluator, catalog, 'atp_players', 'raw', PLAYERS_SCHEMA)
     wta = _build_table(evaluator, catalog, 'wta_players', 'raw', PLAYERS_SCHEMA)
 
-    return ibis.union(
-        atp.mutate(tour=ibis.literal('ATP')),
-        wta.mutate(tour=ibis.literal('WTA')),
-        distinct=False,
-    ).to_sql(dialect='duckdb')
+    return ibis.union(atp.mutate(tour=ibis.literal('ATP')),
+                      wta.mutate(tour=ibis.literal('WTA')),
+                      distinct=False).to_sql(dialect='duckdb')
 ```
 
 - [ ] **Step 5: Create models/bronze/rankings.py**
@@ -1322,13 +1306,11 @@ from sqlmesh.core.model import model
 from models._util import GATEWAY_CATALOG, RANKINGS_SCHEMA, _build_table
 
 
-@model(
-    'bronze.rankings',
-    is_sql=True,
-    kind='INCREMENTAL_BY_UNIQUE_KEY',
-    unique_key=['ranking_date', 'player_id', 'tour'],
-    description='Combined ATP and WTA weekly rankings with tour label.',
-)
+@model('bronze.rankings',
+       is_sql=True,
+       kind='INCREMENTAL_BY_UNIQUE_KEY',
+       unique_key=['ranking_date', 'player_id', 'tour'],
+       description='Combined ATP and WTA weekly rankings with tour label.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Union atp_rankings and wta_rankings, tagging each row with its tour."""
     gateway = evaluator.gateway or 'local_gateway'
@@ -1337,11 +1319,9 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     atp = _build_table(evaluator, catalog, 'atp_rankings', 'raw', RANKINGS_SCHEMA)
     wta = _build_table(evaluator, catalog, 'wta_rankings', 'raw', RANKINGS_SCHEMA)
 
-    return ibis.union(
-        atp.mutate(tour=ibis.literal('ATP')),
-        wta.mutate(tour=ibis.literal('WTA')),
-        distinct=False,
-    ).to_sql(dialect='duckdb')
+    return ibis.union(atp.mutate(tour=ibis.literal('ATP')),
+                      wta.mutate(tour=ibis.literal('WTA')),
+                      distinct=False).to_sql(dialect='duckdb')
 ```
 
 - [ ] **Step 6: Run SQLmesh test**
@@ -1557,13 +1537,11 @@ from sqlmesh.core.model import model
 from models._util import BRONZE_MATCHES_SCHEMA, GATEWAY_CATALOG, _build_table
 
 
-@model(
-    'silver.matches',
-    is_sql=True,
-    kind='INCREMENTAL_BY_TIME_RANGE',
-    time_column='tourney_date',
-    description='Cleaned matches: date cast, surface normalised, null scores removed.',
-)
+@model('silver.matches',
+       is_sql=True,
+       kind='INCREMENTAL_BY_TIME_RANGE',
+       time_column='tourney_date',
+       description='Cleaned matches: date cast, surface normalised, null scores removed.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Cast tourney_date to DATE, normalise surface, drop rows with no score."""
     gateway = evaluator.gateway or 'local_gateway'
@@ -1585,10 +1563,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     result = (
         bronze
         .filter(bronze.score.notnull())
-        .mutate(
-            tourney_date=bronze.tourney_date.cast('string').to_timestamp('%Y%m%d').date(),
-            surface=surface_clean,
-        )
+        .mutate(tourney_date=bronze.tourney_date.cast('string').to_timestamp('%Y%m%d').date(),
+                surface=surface_clean)
     )
 
     return result.to_sql(dialect='duckdb')
@@ -1608,13 +1584,11 @@ from models._util import GATEWAY_CATALOG, PLAYERS_SCHEMA, _build_table
 _BRONZE_PLAYERS_SCHEMA = ibis.Schema({**PLAYERS_SCHEMA, 'tour': 'string'})
 
 
-@model(
-    'silver.players',
-    is_sql=True,
-    kind='INCREMENTAL_BY_UNIQUE_KEY',
-    unique_key=['player_id', 'tour'],
-    description='Player roster with full_name derived, null player_id rows removed.',
-)
+@model('silver.players',
+       is_sql=True,
+       kind='INCREMENTAL_BY_UNIQUE_KEY',
+       unique_key=['player_id', 'tour'],
+       description='Player roster with full_name derived, null player_id rows removed.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Derive full_name, drop rows with null player_id."""
     gateway = evaluator.gateway or 'local_gateway'
@@ -1625,9 +1599,7 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     result = (
         bronze
         .filter(bronze.player_id.notnull())
-        .mutate(
-            full_name=(bronze.first_name + ibis.literal(' ') + bronze.last_name).strip(),
-        )
+        .mutate(full_name=(bronze.first_name + ibis.literal(' ') + bronze.last_name).strip())
     )
 
     return result.to_sql(dialect='duckdb')
@@ -1646,13 +1618,11 @@ from models._util import GATEWAY_CATALOG, RANKINGS_SCHEMA, _build_table
 _BRONZE_RANKINGS_SCHEMA = ibis.Schema({**RANKINGS_SCHEMA, 'tour': 'string'})
 
 
-@model(
-    'silver.rankings',
-    is_sql=True,
-    kind='INCREMENTAL_BY_TIME_RANGE',
-    time_column='ranking_date',
-    description='Weekly rankings with ranking_date cast to DATE.',
-)
+@model('silver.rankings',
+       is_sql=True,
+       kind='INCREMENTAL_BY_TIME_RANGE',
+       time_column='ranking_date',
+       description='Weekly rankings with ranking_date cast to DATE.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Cast ranking_date from YYYYMMDD int to DATE."""
     gateway = evaluator.gateway or 'local_gateway'
@@ -1660,9 +1630,7 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     bronze = _build_table(evaluator, catalog, 'rankings', 'bronze', _BRONZE_RANKINGS_SCHEMA)
 
-    result = bronze.mutate(
-        ranking_date=bronze.ranking_date.cast('string').to_timestamp('%Y%m%d').date(),
-    )
+    result = bronze.mutate(ranking_date=bronze.ranking_date.cast('string').to_timestamp('%Y%m%d').date())
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1891,12 +1859,10 @@ from sqlmesh.core.model import model
 from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
 
 
-@model(
-    'gold.player_surface_stats',
-    is_sql=True,
-    kind='FULL',
-    description='Win rate, wins, losses, and matches played per player per surface.',
-)
+@model('gold.player_surface_stats',
+       is_sql=True,
+       kind='FULL',
+       description='Win rate, wins, losses, and matches played per player per surface.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Calculate win/loss record and win_rate per player, tour, and surface."""
     gateway = evaluator.gateway or 'local_gateway'
@@ -1921,17 +1887,13 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     result = (
         wins
         .outer_join(losses, ['player_id', 'tour', 'surface'])
-        .mutate(
-            player_id=ibis.coalesce(wins.player_id, losses.player_id),
-            tour=ibis.coalesce(wins.tour, losses.tour),
-            surface=ibis.coalesce(wins.surface, losses.surface),
-            wins=wins.wins.fillna(0).cast('int64'),
-            losses=losses.losses.fillna(0).cast('int64'),
-        )
-        .mutate(
-            matches_played=ibis._.wins + ibis._.losses,
-            win_rate=(ibis._.wins.cast('float64') / (ibis._.wins + ibis._.losses)),
-        )
+        .mutate(player_id=ibis.coalesce(wins.player_id, losses.player_id),
+                tour=ibis.coalesce(wins.tour, losses.tour),
+                surface=ibis.coalesce(wins.surface, losses.surface),
+                wins=wins.wins.fillna(0).cast('int64'),
+                losses=losses.losses.fillna(0).cast('int64'))
+        .mutate(matches_played=ibis._.wins + ibis._.losses,
+                win_rate=(ibis._.wins.cast('float64') / (ibis._.wins + ibis._.losses)))
         [['player_id', 'tour', 'surface', 'wins', 'losses', 'matches_played', 'win_rate']]
     )
 
@@ -1949,12 +1911,10 @@ from sqlmesh.core.model import model
 from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
 
 
-@model(
-    'gold.head_to_head',
-    is_sql=True,
-    kind='FULL',
-    description='H2H records: wins for player1 vs player2 (player1_id < player2_id).',
-)
+@model('gold.head_to_head',
+       is_sql=True,
+       kind='FULL',
+       description='H2H records: wins for player1 vs player2 (player1_id < player2_id).')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Count wins for each canonical (player1, player2) pair where player1_id < player2_id."""
     gateway = evaluator.gateway or 'local_gateway'
@@ -1972,10 +1932,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     result = (
         canonical
         .group_by(['player1_id', 'player2_id', 'tour'])
-        .aggregate(
-            player1_wins=canonical.player1_won.sum(),
-            total_matches=canonical.match_num.count(),
-        )
+        .aggregate(player1_wins=canonical.player1_won.sum(),
+                   total_matches=canonical.match_num.count())
         .mutate(player2_wins=ibis._.total_matches - ibis._.player1_wins)
     )
 
@@ -1993,13 +1951,11 @@ from sqlmesh.core.model import model
 from models._util import GATEWAY_CATALOG, SILVER_RANKINGS_SCHEMA, _build_table
 
 
-@model(
-    'gold.rankings_history',
-    is_sql=True,
-    kind='INCREMENTAL_BY_TIME_RANGE',
-    time_column='ranking_date',
-    description='Weekly ranking snapshots with best-ever rank per player.',
-)
+@model('gold.rankings_history',
+       is_sql=True,
+       kind='INCREMENTAL_BY_TIME_RANGE',
+       time_column='ranking_date',
+       description='Weekly ranking snapshots with best-ever rank per player.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Pass through silver rankings and add career_best_rank window column."""
     gateway = evaluator.gateway or 'local_gateway'
@@ -2007,11 +1963,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     rankings = _build_table(evaluator, catalog, 'rankings', 'silver', SILVER_RANKINGS_SCHEMA)
 
-    result = rankings.mutate(
-        career_best_rank=rankings.ranking.min().over(
-            ibis.window(group_by=['player_id', 'tour'], order_by='ranking_date')
-        ),
-    )
+    career_window = ibis.window(group_by=['player_id', 'tour'], order_by='ranking_date')
+    result = rankings.mutate(career_best_rank=rankings.ranking.min().over(career_window))
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -2027,12 +1980,10 @@ from sqlmesh.core.model import model
 from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
 
 
-@model(
-    'gold.tournament_stats',
-    is_sql=True,
-    kind='FULL',
-    description='Match count, avg duration, and unique player count per tournament.',
-)
+@model('gold.tournament_stats',
+       is_sql=True,
+       kind='FULL',
+       description='Match count, avg duration, and distinct winner count per tournament.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Aggregate matches by tourney_id, name, surface, and year."""
     gateway = evaluator.gateway or 'local_gateway'
@@ -2045,14 +1996,9 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     result = (
         matches_with_year
         .group_by(['tourney_id', 'tourney_name', 'surface', 'tour', 'tourney_year'])
-        .aggregate(
-            matches_played=matches_with_year.match_num.count(),
-            avg_match_minutes=matches_with_year.minutes.mean(),
-            unique_players=ibis.union(
-                matches_with_year.select(player_id=matches_with_year.winner_id),
-                matches_with_year.select(player_id=matches_with_year.loser_id),
-            ).player_id.nunique(),
-        )
+        .aggregate(matches_played=matches_with_year.match_num.count(),
+                   avg_match_minutes=matches_with_year.minutes.mean(),
+                   distinct_winners=matches_with_year.winner_id.nunique())
     )
 
     return result.to_sql(dialect='duckdb')
