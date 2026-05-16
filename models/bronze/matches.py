@@ -16,9 +16,10 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
         cols = ', '.join(f'NULL AS "{k}"' for k in BRONZE_MATCHES_SCHEMA)
         return f'SELECT {cols} WHERE FALSE'
 
+    tour_col = '"tour"'
     match_cols = ', '.join(f'"{k}"' for k in MATCHES_SCHEMA)
-    atp_sql = (f"SELECT {match_cols}, 'ATP' AS \"tour\""
-               f" FROM {_read_csv_sql('data/01_raw/atp_matches.csv', MATCHES_SCHEMA)}")
-    wta_sql = (f"SELECT {match_cols}, 'WTA' AS \"tour\""
-               f" FROM {_read_csv_sql('data/01_raw/wta_matches.csv', MATCHES_SCHEMA)}")
+    atp_subq = _read_csv_sql('data/01_raw/atp_matches.csv', MATCHES_SCHEMA)
+    wta_subq = _read_csv_sql('data/01_raw/wta_matches.csv', MATCHES_SCHEMA)
+    atp_sql = f"SELECT {match_cols}, 'ATP' AS {tour_col} FROM {atp_subq}"
+    wta_sql = f"SELECT {match_cols}, 'WTA' AS {tour_col} FROM {wta_subq}"
     return f'{atp_sql} UNION ALL {wta_sql}'

@@ -13,12 +13,13 @@ from models._util import GATEWAY_CATALOG, SILVER_RANKINGS_SCHEMA, _build_table
        description='Weekly ranking snapshots with best-ever rank per player.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Pass through silver rankings and add career_best_rank window column."""
+    from ibis import _
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
 
     rankings = _build_table(evaluator, catalog, 'rankings', 'silver', SILVER_RANKINGS_SCHEMA)
 
     career_window = ibis.window(group_by=['player_id', 'tour'], order_by='ranking_date')
-    result = rankings.mutate(career_best_rank=rankings['ranking'].min().over(career_window))
+    result = rankings.mutate(career_best_rank=_.ranking.min().over(career_window))
 
     return result.to_sql(dialect='duckdb')

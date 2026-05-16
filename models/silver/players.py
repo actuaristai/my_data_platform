@@ -15,13 +15,14 @@ _BRONZE_PLAYERS_SCHEMA: dict[str, str] = {**PLAYERS_SCHEMA, 'tour': 'string'}
        description='Player roster with full_name derived, null player_id rows removed.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Derive full_name, drop rows with null player_id."""
+    from ibis import _
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
 
     bronze = _build_table(evaluator, catalog, 'players', 'bronze', _BRONZE_PLAYERS_SCHEMA)
 
     result = bronze \
-        .filter(bronze['player_id'].notnull()) \
-        .mutate(full_name=(bronze['first_name'] + ibis.literal(' ') + bronze['last_name']).strip())
+        .filter(_.player_id.notnull()) \
+        .mutate(full_name=(_.first_name + ibis.literal(' ') + _.last_name).strip())
 
     return result.to_sql(dialect='duckdb')

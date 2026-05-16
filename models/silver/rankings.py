@@ -14,12 +14,12 @@ _BRONZE_RANKINGS_SCHEMA: dict[str, str] = {**RANKINGS_SCHEMA, 'tour': 'string'}
        description='Weekly rankings with ranking_date cast to DATE.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Cast ranking_date from YYYYMMDD int to DATE."""
+    from ibis import _
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
 
     bronze = _build_table(evaluator, catalog, 'rankings', 'bronze', _BRONZE_RANKINGS_SCHEMA)
 
-    result = bronze \
-        .mutate(ranking_date=bronze['ranking_date'].cast('string').as_timestamp('%Y%m%d').date())
+    result = bronze.mutate(ranking_date=_.ranking_date.cast('string').as_timestamp('%Y%m%d').date())
 
     return result.to_sql(dialect='duckdb')

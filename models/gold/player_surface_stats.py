@@ -12,6 +12,7 @@ from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
        description='Win rate, wins, losses, and matches played per player per surface.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Calculate win/loss record and win_rate per player, tour, and surface."""
+    from ibis import _
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
 
@@ -19,23 +20,23 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     wins = matches \
         .group_by(['winner_id', 'tour', 'surface']) \
-        .aggregate(wins=matches['match_num'].count()) \
+        .aggregate(wins=_.match_num.count()) \
         .rename(player_id='winner_id')
     losses = matches \
         .group_by(['loser_id', 'tour', 'surface']) \
-        .aggregate(losses=matches['match_num'].count()) \
+        .aggregate(losses=_.match_num.count()) \
         .rename(player_id='loser_id')
-    joined = wins \
-        .outer_join(losses, ['player_id', 'tour', 'surface'])
-    resolved = joined \
-        .mutate(player_id=ibis.coalesce(wins['player_id'], losses['player_id']),
-                tour=ibis.coalesce(wins['tour'], losses['tour']),
-                surface=ibis.coalesce(wins['surface'], losses['surface']),
-                wins=joined['wins'].fill_null(0).cast('int64'),
-                losses=joined['losses'].fill_null(0).cast('int64'))
+    joined = wins.outer_join(losses, ['player_id', 'tour', 'surface'])
+    resolved = joined.mutate(
+        player_id=ibis.coalesce(wins['player_id'], losses['player_id']),
+        tour=ibis.coalesce(wins['tour'], losses['tour']),
+        surface=ibis.coalesce(wins['surface'], losses['surface']),
+        wins=joined['wins'].fill_null(0).cast('int64'),
+        losses=joined['losses'].fill_null(0).cast('int64'),
+    )
     result = resolved \
-        .mutate(matches_played=resolved['wins'] + resolved['losses'],
-                win_rate=(resolved['wins'].cast('float64') / (resolved['wins'] + resolved['losses']))) \
+        .mutate(matches_played=_.wins + _.losses,
+                win_rate=_.wins.cast('float64') / (_.wins + _.losses)) \
         .select(['player_id', 'tour', 'surface', 'wins', 'losses', 'matches_played', 'win_rate'])
 
     return result.to_sql(dialect='duckdb')

@@ -18,9 +18,10 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
         cols = ', '.join(f'NULL AS "{k}"' for k in _BRONZE_PLAYERS_SCHEMA)
         return f'SELECT {cols} WHERE FALSE'
 
+    tour_col = '"tour"'
     player_cols = ', '.join(f'"{k}"' for k in PLAYERS_SCHEMA)
-    atp_sql = (f"SELECT {player_cols}, 'ATP' AS \"tour\""
-               f" FROM {_read_csv_sql('data/01_raw/atp_players.csv', PLAYERS_SCHEMA)}")
-    wta_sql = (f"SELECT {player_cols}, 'WTA' AS \"tour\""
-               f" FROM {_read_csv_sql('data/01_raw/wta_players.csv', PLAYERS_SCHEMA)}")
+    atp_subq = _read_csv_sql('data/01_raw/atp_players.csv', PLAYERS_SCHEMA)
+    wta_subq = _read_csv_sql('data/01_raw/wta_players.csv', PLAYERS_SCHEMA)
+    atp_sql = f"SELECT {player_cols}, 'ATP' AS {tour_col} FROM {atp_subq}"
+    wta_sql = f"SELECT {player_cols}, 'WTA' AS {tour_col} FROM {wta_subq}"
     return f'{atp_sql} UNION ALL {wta_sql}'
