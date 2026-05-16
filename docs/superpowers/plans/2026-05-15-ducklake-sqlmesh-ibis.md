@@ -681,11 +681,7 @@ from loguru import logger
 from conf.config import conf
 
 
-def download_tour_matches(tour: str,
-                          base_url: str,
-                          year_start: int,
-                          year_end: int,
-                          output_path: Path) -> None:
+def download_tour_matches(tour: str, base_url: str, year_start: int, year_end: int, output_path: Path) -> None:
     """Download and concatenate per-year match CSVs into a single file."""
     frames = []
     for year in range(year_start, year_end + 1):
@@ -713,11 +709,7 @@ def download_tour_players(tour: str, base_url: str, output_path: Path) -> None:
     logger.info(f'Saved {output_path}')
 
 
-def download_tour_rankings(tour: str,
-                           base_url: str,
-                           year_start: int,
-                           year_end: int,
-                           output_path: Path) -> None:
+def download_tour_rankings(tour: str, base_url: str, year_start: int, year_end: int, output_path: Path) -> None:
     """Download and concatenate per-year rankings CSVs into a single file."""
     frames = []
     for year in range(year_start, year_end + 1):
@@ -1261,8 +1253,7 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     atp = _build_table(evaluator, catalog, 'atp_matches', 'raw', MATCHES_SCHEMA)
     wta = _build_table(evaluator, catalog, 'wta_matches', 'raw', MATCHES_SCHEMA)
 
-    return ibis.union(atp.mutate(tour=ibis.literal('ATP')),
-                      wta.mutate(tour=ibis.literal('WTA')),
+    return ibis.union(atp.mutate(tour=ibis.literal('ATP')), wta.mutate(tour=ibis.literal('WTA')),
                       distinct=False).to_sql(dialect='duckdb')
 ```
 
@@ -1290,8 +1281,7 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     atp = _build_table(evaluator, catalog, 'atp_players', 'raw', PLAYERS_SCHEMA)
     wta = _build_table(evaluator, catalog, 'wta_players', 'raw', PLAYERS_SCHEMA)
 
-    return ibis.union(atp.mutate(tour=ibis.literal('ATP')),
-                      wta.mutate(tour=ibis.literal('WTA')),
+    return ibis.union(atp.mutate(tour=ibis.literal('ATP')), wta.mutate(tour=ibis.literal('WTA')),
                       distinct=False).to_sql(dialect='duckdb')
 ```
 
@@ -1319,8 +1309,7 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     atp = _build_table(evaluator, catalog, 'atp_rankings', 'raw', RANKINGS_SCHEMA)
     wta = _build_table(evaluator, catalog, 'wta_rankings', 'raw', RANKINGS_SCHEMA)
 
-    return ibis.union(atp.mutate(tour=ibis.literal('ATP')),
-                      wta.mutate(tour=ibis.literal('WTA')),
+    return ibis.union(atp.mutate(tour=ibis.literal('ATP')), wta.mutate(tour=ibis.literal('WTA')),
                       distinct=False).to_sql(dialect='duckdb')
 ```
 
@@ -1549,23 +1538,11 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     bronze = _build_table(evaluator, catalog, 'matches', 'bronze', BRONZE_MATCHES_SCHEMA)
 
-    # Normalise surface to title-case using explicit mapping (handles legacy 'carpet')
-    surface_clean = (
-        ibis.case()
-        .when(bronze.surface.lower() == ibis.literal('hard'), ibis.literal('Hard'))
-        .when(bronze.surface.lower() == ibis.literal('clay'), ibis.literal('Clay'))
-        .when(bronze.surface.lower() == ibis.literal('grass'), ibis.literal('Grass'))
-        .when(bronze.surface.lower() == ibis.literal('carpet'), ibis.literal('Carpet'))
-        .else_(bronze.surface)
-        .end()
-    )
-
-    result = (
-        bronze
-        .filter(bronze.score.notnull())
-        .mutate(tourney_date=bronze.tourney_date.cast('string').to_timestamp('%Y%m%d').date(),
-                surface=surface_clean)
-    )
+    surface_clean = bronze.surface.lower().cases(('hard', 'Hard'), ('clay', 'Clay'), ('grass', 'Grass'),
+                                                 ('carpet', 'Carpet'),
+                                                 else_=bronze.surface)
+    result = (bronze.filter(bronze.score.notnull()).mutate(
+        tourney_date=bronze.tourney_date.cast('string').to_timestamp('%Y%m%d').date(), surface=surface_clean))
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1596,11 +1573,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     bronze = _build_table(evaluator, catalog, 'players', 'bronze', _BRONZE_PLAYERS_SCHEMA)
 
-    result = (
-        bronze
-        .filter(bronze.player_id.notnull())
-        .mutate(full_name=(bronze.first_name + ibis.literal(' ') + bronze.last_name).strip())
-    )
+    result = (bronze.filter(bronze.player_id.notnull()).mutate(full_name=(bronze.first_name + ibis.literal(' ') +
+                                                                          bronze.last_name).strip()))
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1870,32 +1844,20 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     matches = _build_table(evaluator, catalog, 'matches', 'silver', SILVER_MATCHES_SCHEMA)
 
-    wins = (
-        matches
-        .group_by(['winner_id', 'tour', 'surface'])
-        .aggregate(wins=matches.match_num.count())
-        .rename(player_id='winner_id')
-    )
-
-    losses = (
-        matches
-        .group_by(['loser_id', 'tour', 'surface'])
-        .aggregate(losses=matches.match_num.count())
-        .rename(player_id='loser_id')
-    )
-
-    result = (
-        wins
-        .outer_join(losses, ['player_id', 'tour', 'surface'])
-        .mutate(player_id=ibis.coalesce(wins.player_id, losses.player_id),
-                tour=ibis.coalesce(wins.tour, losses.tour),
-                surface=ibis.coalesce(wins.surface, losses.surface),
-                wins=wins.wins.fillna(0).cast('int64'),
-                losses=losses.losses.fillna(0).cast('int64'))
-        .mutate(matches_played=ibis._.wins + ibis._.losses,
-                win_rate=(ibis._.wins.cast('float64') / (ibis._.wins + ibis._.losses)))
-        [['player_id', 'tour', 'surface', 'wins', 'losses', 'matches_played', 'win_rate']]
-    )
+    wins = (matches.group_by(['winner_id', 'tour',
+                              'surface']).aggregate(wins=matches.match_num.count()).rename(player_id='winner_id'))
+    losses = (matches.group_by(['loser_id', 'tour',
+                                'surface']).aggregate(losses=matches.match_num.count()).rename(player_id='loser_id'))
+    joined = wins.outer_join(losses, ['player_id', 'tour', 'surface'])
+    resolved = joined.mutate(player_id=ibis.coalesce(wins.player_id, losses.player_id),
+                             tour=ibis.coalesce(wins.tour, losses.tour),
+                             surface=ibis.coalesce(wins.surface, losses.surface),
+                             wins=wins.wins.fillna(0).cast('int64'),
+                             losses=losses.losses.fillna(0).cast('int64'))
+    result = resolved.mutate(matches_played=ibis._.wins + ibis._.losses,
+                             win_rate=(ibis._.wins.cast('float64') / (ibis._.wins + ibis._.losses)))[[
+                                 'player_id', 'tour', 'surface', 'wins', 'losses', 'matches_played', 'win_rate'
+                             ]]
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1922,20 +1884,13 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     matches = _build_table(evaluator, catalog, 'matches', 'silver', SILVER_MATCHES_SCHEMA)
 
-    # Assign canonical ordering so player1_id is always the smaller ID
-    canonical = matches.mutate(
-        player1_id=ibis.least(matches.winner_id, matches.loser_id),
-        player2_id=ibis.greatest(matches.winner_id, matches.loser_id),
-        player1_won=(matches.winner_id < matches.loser_id).cast('int64'),
-    )
-
-    result = (
-        canonical
-        .group_by(['player1_id', 'player2_id', 'tour'])
-        .aggregate(player1_wins=canonical.player1_won.sum(),
-                   total_matches=canonical.match_num.count())
-        .mutate(player2_wins=ibis._.total_matches - ibis._.player1_wins)
-    )
+    canonical = matches.mutate(player1_id=ibis.least(matches.winner_id, matches.loser_id),
+                               player2_id=ibis.greatest(matches.winner_id, matches.loser_id),
+                               player1_won=(matches.winner_id < matches.loser_id).cast('int64'))
+    result = (canonical.group_by(['player1_id', 'player2_id', 'tour']).aggregate(
+        player1_wins=canonical.player1_won.sum(),
+        total_matches=canonical.match_num.count()).mutate(
+            player2_wins=ibis._.total_matches - ibis._.player1_wins))
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1992,14 +1947,10 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     matches = _build_table(evaluator, catalog, 'matches', 'silver', SILVER_MATCHES_SCHEMA)
 
     matches_with_year = matches.mutate(tourney_year=matches.tourney_date.year())
-
-    result = (
-        matches_with_year
-        .group_by(['tourney_id', 'tourney_name', 'surface', 'tour', 'tourney_year'])
-        .aggregate(matches_played=matches_with_year.match_num.count(),
-                   avg_match_minutes=matches_with_year.minutes.mean(),
-                   distinct_winners=matches_with_year.winner_id.nunique())
-    )
+    result = (matches_with_year.group_by(['tourney_id', 'tourney_name', 'surface', 'tour', 'tourney_year'
+                                          ]).aggregate(matches_played=matches_with_year.match_num.count(),
+                                                       avg_match_minutes=matches_with_year.minutes.mean(),
+                                                       distinct_winners=matches_with_year.winner_id.nunique()))
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -2102,55 +2053,47 @@ def validate_raw_matches(con: ibis.BaseBackend | None = None) -> pb.Validate:
     """Validate raw.atp_matches and raw.wta_matches have required columns non-null."""
     _con = con or get_connection()
     atp = _con.table('atp_matches', database='my_lakehouse.raw')
-    return (
-        pb.Validate(data=atp, tbl_name='raw.atp_matches', label='Raw ATP Matches')
-        .col_vals_not_null(columns='tourney_id')
-        .col_vals_not_null(columns='winner_id')
-        .col_vals_not_null(columns='loser_id')
-        .col_vals_not_null(columns='tourney_date')
-        .interrogate()
-    )
+    v = pb.Validate(data=atp, tbl_name='raw.atp_matches', label='Raw ATP Matches')
+    v = v.col_vals_not_null(columns='tourney_id')
+    v = v.col_vals_not_null(columns='winner_id')
+    v = v.col_vals_not_null(columns='loser_id')
+    v = v.col_vals_not_null(columns='tourney_date')
+    return v.interrogate()
 
 
 def validate_bronze_matches(con: ibis.BaseBackend | None = None) -> pb.Validate:
     """Validate bronze.matches: no duplicate unique keys, tour column valid."""
     _con = con or get_connection()
     table = _con.table('matches', database='my_lakehouse.bronze')
-    return (
-        pb.Validate(data=table, tbl_name='bronze.matches', label='Bronze Matches')
-        .col_vals_not_null(columns='tourney_id')
-        .col_vals_not_null(columns='match_num')
-        .col_vals_not_null(columns='tour')
-        .col_vals_in_set(columns='tour', set=['ATP', 'WTA'])
-        .rows_distinct(columns_subset=['tourney_id', 'match_num', 'tour'])
-        .interrogate()
-    )
+    v = pb.Validate(data=table, tbl_name='bronze.matches', label='Bronze Matches')
+    v = v.col_vals_not_null(columns='tourney_id')
+    v = v.col_vals_not_null(columns='match_num')
+    v = v.col_vals_not_null(columns='tour')
+    v = v.col_vals_in_set(columns='tour', set=['ATP', 'WTA'])
+    v = v.rows_distinct(columns_subset=['tourney_id', 'match_num', 'tour'])
+    return v.interrogate()
 
 
 def validate_silver_matches(con: ibis.BaseBackend | None = None) -> pb.Validate:
     """Validate silver.matches: surface in known set, no null scores."""
     _con = con or get_connection()
     table = _con.table('matches', database='my_lakehouse.silver')
-    return (
-        pb.Validate(data=table, tbl_name='silver.matches', label='Silver Matches')
-        .col_vals_not_null(columns='score')
-        .col_vals_in_set(columns='surface', set=['Hard', 'Clay', 'Grass', 'Carpet'])
-        .col_vals_not_null(columns='tourney_date')
-        .interrogate()
-    )
+    v = pb.Validate(data=table, tbl_name='silver.matches', label='Silver Matches')
+    v = v.col_vals_not_null(columns='score')
+    v = v.col_vals_in_set(columns='surface', set=['Hard', 'Clay', 'Grass', 'Carpet'])
+    v = v.col_vals_not_null(columns='tourney_date')
+    return v.interrogate()
 
 
 def validate_gold_surface_stats(con: ibis.BaseBackend | None = None) -> pb.Validate:
     """Validate gold.player_surface_stats: win_rate in [0, 1], matches_played > 0."""
     _con = con or get_connection()
     table = _con.table('player_surface_stats', database='my_lakehouse.gold')
-    return (
-        pb.Validate(data=table, tbl_name='gold.player_surface_stats', label='Gold Surface Stats')
-        .col_vals_between(columns='win_rate', left=0.0, right=1.0)
-        .col_vals_gt(columns='matches_played', value=0)
-        .rows_distinct(columns_subset=['player_id', 'surface', 'tour'])
-        .interrogate()
-    )
+    v = pb.Validate(data=table, tbl_name='gold.player_surface_stats', label='Gold Surface Stats')
+    v = v.col_vals_between(columns='win_rate', left=0.0, right=1.0)
+    v = v.col_vals_gt(columns='matches_played', value=0)
+    v = v.rows_distinct(columns_subset=['player_id', 'surface', 'tour'])
+    return v.interrogate()
 ```
 
 - [ ] **Step 6: Create src/my_data_platform/validate.py**
