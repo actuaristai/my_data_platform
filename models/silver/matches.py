@@ -11,7 +11,7 @@ from models._util import BRONZE_MATCHES_SCHEMA, GATEWAY_CATALOG, _build_table
        kind={'name': ModelKindName.INCREMENTAL_BY_TIME_RANGE, 'time_column': 'tourney_date'},
        description='Cleaned matches: date cast, surface normalised, null scores removed.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
-    """Cast tourney_date to DATE, normalise surface, drop rows with no score."""
+    """Cast tourney_date to DATE, normalise surface, try-cast seed columns, drop null scores."""
     from ibis import _  # noqa: PLC0415
     gateway = evaluator.gateway or 'local_gateway'
     catalog = GATEWAY_CATALOG.get(gateway, 'my_lakehouse')
@@ -25,6 +25,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
                                                    ('clay', 'Clay'),
                                                    ('grass', 'Grass'),
                                                    ('carpet', 'Carpet'),
-                                                   else_=_['surface']))
+                                                   else_=_['surface']),
+                winner_seed=_['winner_seed'].try_cast('float64'),
+                loser_seed=_['loser_seed'].try_cast('float64'))
 
     return result.to_sql(dialect='duckdb')

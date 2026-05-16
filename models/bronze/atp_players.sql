@@ -1,0 +1,16 @@
+MODEL (
+  name bronze.atp_players,
+  kind SEED (
+    path '../../data/01_raw/atp_players.csv'
+  ),
+  columns (
+    player_id INT,
+    first_name VARCHAR,
+    last_name VARCHAR,
+    hand VARCHAR,
+    dob DOUBLE,
+    ioc VARCHAR,
+    height DOUBLE,
+    wikidata_id VARCHAR
+  )
+);
