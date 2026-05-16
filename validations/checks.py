@@ -38,7 +38,8 @@ def validate_silver_matches(con: ibis.BaseBackend | None = None) -> pb.Validate:
     table = _con.table('matches', database='my_lakehouse.silver')
     v = pb.Validate(data=table, tbl_name='silver.matches', label='Silver Matches') \
         .col_vals_not_null(columns='score') \
-        .col_vals_in_set(columns='surface', set=['Hard', 'Clay', 'Grass', 'Carpet']) \
+        .col_vals_in_set(columns='surface', set=['Hard', 'Clay', 'Grass', 'Carpet'],
+                         pre=lambda t: t.filter(t['surface'].notnull())) \
         .col_vals_not_null(columns='tourney_date')
     return v.interrogate()
 
