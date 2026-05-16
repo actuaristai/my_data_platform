@@ -6,7 +6,7 @@
 
 **Architecture:** SQLmesh manages incremental execution and column-level lineage via a local DuckLake catalog (`data/catalog.ducklake`), with a MotherDuck gateway for staging (`dev` environment) and production. All Ibis models use `is_sql=True` returning `.to_sql(dialect='duckdb')` to preserve column-level lineage. pins handles raw data download from GitHub and gold layer publishing for consumers.
 
-**Tech Stack:** Python 3.13, uv, SQLmesh, DuckLake, ibis-framework[duckdb], pins, pointblank, dynaconf, pandas, requests, just, ruff, pytest
+**Tech Stack:** Python 3.13, uv, SQLmesh, DuckLake, ibis-framework[duckdb], pins, pointblank, dynaconf, requests, just, ruff, pytest
 
 ---
 
@@ -14,7 +14,7 @@
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `pyproject.toml` | Modify | Add sqlmesh, ibis, pins, pointblank, requests, pandas deps; remove dvc |
+| `pyproject.toml` | Modify | Add sqlmesh, ibis, pins, pointblank, requests deps; remove dvc |
 | `config.yaml` | Create | SQLmesh local + MotherDuck gateway config |
 | `conf/parameters.toml` | Modify | Add ducklake, pins, tennis config sections |
 | `justfile` | Modify | Add run/stage/deploy/ingest/validate/publish commands |
@@ -80,7 +80,6 @@ dependencies = ["duckdb>=1.2.0",
                  "loguru>=0.7.3",
                  "nbclient>=0.10.2",
                  "nbformat>=5.10.4",
-                 "pandas>=2.2.0",
                  "pins>=0.9.1",
                  "pointblank>=0.17.0",
                  "pytest>=8.3.5",
@@ -101,11 +100,11 @@ email = "human@actuarist.ai"
 [dependency-groups]
 lint = ["ruff"]
 test = ["pytest", "pytest-cov", "dynaconf", "typer", "requests", "loguru",
-    "toml", "ibis-framework[duckdb]", "pointblank", "pandas"]
+    "toml", "ibis-framework[duckdb]", "pointblank"]
 dev = ["ipykernel", "nbclient", "nbformat", "ruff", "autopep8", "commitizen",
         "pytest", "pytest-cov", "quartodoc", "toml", "typer",
         "sqlmesh[duckdb]", "ibis-framework[duckdb]", "pins", "pointblank",
-        "requests", "pandas"]
+        "requests"]
 
 [tool.uv]
 default-groups = "all"
@@ -141,7 +140,7 @@ packages = ["src/my_data_platform", "conf"]
 uv sync
 ```
 
-Expected: resolves and installs sqlmesh, ibis-framework[duckdb], pins, pointblank, pandas, requests.
+Expected: resolves and installs sqlmesh, ibis-framework[duckdb], pins, pointblank, requests.
 
 - [ ] **Step 3: Create config.yaml**
 
@@ -565,18 +564,22 @@ git commit -m "feat: add shared model utilities and ibis schemas"
 
 ```python
 # tests/test_ingest.py
+import csv
 import io
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
-import pytest
+import ibis
 
 from my_data_platform.ingest import download_tour_matches, download_tour_players, download_tour_rankings
 
 
 def _csv_bytes(rows: list[dict]) -> bytes:
-    return pd.DataFrame(rows).to_csv(index=False).encode()
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=list(rows[0]))
+    writer.writeheader()
+    writer.writerows(rows)
+    return buf.getvalue().encode()
 
 
 MATCH_ROW = {'tourney_id': '2024-540', 'tourney_name': 'Wimbledon', 'surface': 'Grass',
@@ -593,9 +596,9 @@ def test_download_tour_matches_concatenates_years(mock_get, tmp_path):
 
     download_tour_matches('atp', 'https://example.com', 2024, 2024, out)
 
-    df = pd.read_csv(out)
-    assert len(df) == 1
-    assert df.iloc[0]['tourney_id'] == '2024-540'
+    t = ibis.read_csv(str(out))
+    assert t.count().execute() == 1
+    assert t.filter(t['tourney_id'] == '2024-540').count().execute() == 1
     mock_get.assert_called_once_with('https://example.com/atp_matches_2024.csv', timeout=30)
 
 
@@ -609,8 +612,8 @@ def test_download_tour_matches_skips_404(mock_get, tmp_path):
 
     download_tour_matches('atp', 'https://example.com', 2023, 2024, out)
 
-    df = pd.read_csv(out)
-    assert len(df) == 1
+    t = ibis.read_csv(str(out))
+    assert t.count().execute() == 1
 
 
 @patch('my_data_platform.ingest.requests.get')
@@ -620,8 +623,8 @@ def test_download_tour_players(mock_get, tmp_path):
 
     download_tour_players('atp', 'https://example.com', out)
 
-    df = pd.read_csv(out)
-    assert df.iloc[0]['first_name'] == 'Novak'
+    t = ibis.read_csv(str(out))
+    assert t.filter(t['first_name'] == 'Novak').count().execute() == 1
 
 
 @patch('my_data_platform.ingest.requests.get')
@@ -631,8 +634,8 @@ def test_download_tour_rankings(mock_get, tmp_path):
 
     download_tour_rankings('atp', 'https://example.com', 2024, 2024, out)
 
-    df = pd.read_csv(out)
-    assert df.iloc[0]['ranking'] == 1
+    t = ibis.read_csv(str(out))
+    assert t.filter(t['ranking'] == 1).count().execute() == 1
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -649,19 +652,34 @@ Expected: `ImportError: cannot import name 'download_tour_matches'`
 """Download ATP/WTA tennis CSVs from GitHub into data/01_raw/."""
 from __future__ import annotations
 
-import io
+import tempfile
 from pathlib import Path
 
-import pandas as pd
+import ibis
 import requests
 from loguru import logger
 
 from conf.config import conf
 
 
+def _concat_to_csv(contents: list[bytes], output_path: Path) -> int:
+    """Union a list of CSV byte blobs and write to output_path via ibis/duckdb."""
+    con = ibis.duckdb.connect()
+    with tempfile.TemporaryDirectory() as tmpdir:
+        parts = []
+        for i, content in enumerate(contents):
+            p = Path(tmpdir) / f'part_{i}.csv'
+            p.write_bytes(content)
+            parts.append(con.read_csv(str(p)))
+        result = ibis.union(*parts) if len(parts) > 1 else parts[0]
+        total = result.count().execute()
+        result.to_csv(str(output_path))
+    return total
+
+
 def download_tour_matches(tour: str, base_url: str, year_start: int, year_end: int, output_path: Path) -> None:
     """Download and concatenate per-year match CSVs into a single file."""
-    frames = []
+    contents = []
     for year in range(year_start, year_end + 1):
         url = f'{base_url}/{tour}_matches_{year}.csv'
         logger.info(f'Downloading {url}')
@@ -670,11 +688,11 @@ def download_tour_matches(tour: str, base_url: str, year_start: int, year_end: i
             logger.warning(f'Not found (skipping): {url}')
             continue
         resp.raise_for_status()
-        frames.append(pd.read_csv(io.BytesIO(resp.content), low_memory=False))
-    if not frames:
+        contents.append(resp.content)
+    if not contents:
         raise RuntimeError(f'No match data found for {tour} {year_start}–{year_end}')
-    pd.concat(frames, ignore_index=True).to_csv(output_path, index=False)
-    logger.info(f'Saved {output_path} ({sum(len(f) for f in frames):,} rows)')
+    total = _concat_to_csv(contents, output_path)
+    logger.info(f'Saved {output_path} ({total:,} rows)')
 
 
 def download_tour_players(tour: str, base_url: str, output_path: Path) -> None:
@@ -683,13 +701,13 @@ def download_tour_players(tour: str, base_url: str, output_path: Path) -> None:
     logger.info(f'Downloading {url}')
     resp = requests.get(url, timeout=30)
     resp.raise_for_status()
-    pd.read_csv(io.BytesIO(resp.content), low_memory=False).to_csv(output_path, index=False)
+    output_path.write_bytes(resp.content)
     logger.info(f'Saved {output_path}')
 
 
 def download_tour_rankings(tour: str, base_url: str, year_start: int, year_end: int, output_path: Path) -> None:
     """Download and concatenate per-year rankings CSVs into a single file."""
-    frames = []
+    contents = []
     for year in range(year_start, year_end + 1):
         url = f'{base_url}/{tour}_rankings_{year}s.csv'
         logger.info(f'Downloading {url}')
@@ -698,11 +716,11 @@ def download_tour_rankings(tour: str, base_url: str, year_start: int, year_end: 
             logger.warning(f'Not found (skipping): {url}')
             continue
         resp.raise_for_status()
-        frames.append(pd.read_csv(io.BytesIO(resp.content), low_memory=False))
-    if not frames:
+        contents.append(resp.content)
+    if not contents:
         raise RuntimeError(f'No rankings data found for {tour} {year_start}–{year_end}')
-    pd.concat(frames, ignore_index=True).to_csv(output_path, index=False)
-    logger.info(f'Saved {output_path} ({sum(len(f) for f in frames):,} rows)')
+    total = _concat_to_csv(contents, output_path)
+    logger.info(f'Saved {output_path} ({total:,} rows)')
 
 
 def main() -> None:
@@ -2179,9 +2197,9 @@ def publish_gold_tables(board_path: str | None = None) -> None:
 
     for table_name in _GOLD_TABLES:
         logger.info(f'Publishing gold.{table_name}')
-        df = con.table(table_name, database='my_lakehouse.gold').execute()
-        board.pin_write(df, f'gold/{table_name}', type='parquet')
-        logger.info(f'Pinned gold/{table_name} ({len(df):,} rows)')
+        arrow_table = con.table(table_name, database='my_lakehouse.gold').to_pyarrow()
+        board.pin_write(arrow_table, f'gold/{table_name}', type='parquet')
+        logger.info(f'Pinned gold/{table_name} ({arrow_table.num_rows:,} rows)')
 
     con.disconnect()
     logger.info('Publish complete.')
