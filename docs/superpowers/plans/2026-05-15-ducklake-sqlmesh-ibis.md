@@ -72,29 +72,27 @@ version = "0.1.0"
 description = "Opinionated guide to best practices set up of open source data platform with best data engineering practices"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "duckdb>=1.2.0",
-    "dynaconf>=3.2.10",
-    "griffe<1.0.0",
-    "ibis-framework[duckdb]>=11.0.0",
-    "ipykernel>=6.29.5",
-    "loguru>=0.7.3",
-    "nbclient>=0.10.2",
-    "nbformat>=5.10.4",
-    "pandas>=2.2.0",
-    "pins>=0.9.1",
-    "pointblank>=0.17.0",
-    "pytest>=8.3.5",
-    "pytest-cov>=6.0.0",
-    "quartodoc>=0.9.1",
-    "requests>=2.32.0",
-    "ruff>=0.11.2",
-    "sqlmesh[duckdb]>=0.228.2",
-    "toml>=0.10.2",
-    "typer>=0.15.2",
-    "autopep8>=2.3.2",
-    "commitizen>=4.4.1",
-]
+dependencies = ["duckdb>=1.2.0",
+                 "dynaconf>=3.2.10",
+                 "griffe<1.0.0",
+                 "ibis-framework[duckdb]>=11.0.0",
+                 "ipykernel>=6.29.5",
+                 "loguru>=0.7.3",
+                 "nbclient>=0.10.2",
+                 "nbformat>=5.10.4",
+                 "pandas>=2.2.0",
+                 "pins>=0.9.1",
+                 "pointblank>=0.17.0",
+                 "pytest>=8.3.5",
+                 "pytest-cov>=6.0.0",
+                 "quartodoc>=0.9.1",
+                 "requests>=2.32.0",
+                 "ruff>=0.11.2",
+                 "sqlmesh[duckdb]>=0.228.2",
+                 "toml>=0.10.2",
+                 "typer>=0.15.2",
+                 "autopep8>=2.3.2",
+                 "commitizen>=4.4.1"]
 
 [[project.authors]]
 name = "Actuarist AI"
@@ -102,16 +100,12 @@ email = "human@actuarist.ai"
 
 [dependency-groups]
 lint = ["ruff"]
-test = [
-    "pytest", "pytest-cov", "dynaconf", "typer", "requests", "loguru",
-    "toml", "ibis-framework[duckdb]", "pointblank", "pandas",
-]
-dev = [
-    "ipykernel", "nbclient", "nbformat", "ruff", "autopep8", "commitizen",
-    "pytest", "pytest-cov", "quartodoc", "toml", "typer",
-    "sqlmesh[duckdb]", "ibis-framework[duckdb]", "pins", "pointblank",
-    "requests", "pandas",
-]
+test = ["pytest", "pytest-cov", "dynaconf", "typer", "requests", "loguru",
+    "toml", "ibis-framework[duckdb]", "pointblank", "pandas"]
+dev = ["ipykernel", "nbclient", "nbformat", "ruff", "autopep8", "commitizen",
+        "pytest", "pytest-cov", "quartodoc", "toml", "typer",
+        "sqlmesh[duckdb]", "ibis-framework[duckdb]", "pins", "pointblank",
+        "requests", "pandas"]
 
 [tool.uv]
 default-groups = "all"
@@ -433,107 +427,93 @@ def con():
 import ibis
 from sqlmesh.core.macros import MacroEvaluator
 
-GATEWAY_CATALOG: dict[str, str] = {
-    'local_gateway': 'my_lakehouse',
-    'motherduck': 'my_lakehouse',
-}
+GATEWAY_CATALOG: dict[str, str] = {'local_gateway': 'my_lakehouse',
+                                   'motherduck': 'my_lakehouse'}
 
 # Schema for raw.atp_matches / raw.wta_matches (tourney_date is stored as YYYYMMDD int)
-MATCHES_SCHEMA = ibis.Schema({
-    'tourney_id': 'string',
-    'tourney_name': 'string',
-    'surface': 'string',
-    'draw_size': 'int32',
-    'tourney_level': 'string',
-    'tourney_date': 'int32',
-    'match_num': 'int32',
-    'winner_id': 'int32',
-    'winner_seed': 'float64',
-    'winner_entry': 'string',
-    'winner_name': 'string',
-    'winner_hand': 'string',
-    'winner_ht': 'float64',
-    'winner_ioc': 'string',
-    'winner_age': 'float64',
-    'loser_id': 'int32',
-    'loser_seed': 'float64',
-    'loser_entry': 'string',
-    'loser_name': 'string',
-    'loser_hand': 'string',
-    'loser_ht': 'float64',
-    'loser_ioc': 'string',
-    'loser_age': 'float64',
-    'score': 'string',
-    'best_of': 'int32',
-    'round': 'string',
-    'minutes': 'float64',
-    'w_ace': 'float64',
-    'w_df': 'float64',
-    'w_svpt': 'float64',
-    'w_1stIn': 'float64',
-    'w_1stWon': 'float64',
-    'w_2ndWon': 'float64',
-    'w_SvGm': 'float64',
-    'w_bpSaved': 'float64',
-    'w_bpFaced': 'float64',
-    'l_ace': 'float64',
-    'l_df': 'float64',
-    'l_svpt': 'float64',
-    'l_1stIn': 'float64',
-    'l_1stWon': 'float64',
-    'l_2ndWon': 'float64',
-    'l_SvGm': 'float64',
-    'l_bpSaved': 'float64',
-    'l_bpFaced': 'float64',
-    'winner_rank': 'float64',
-    'winner_rank_points': 'float64',
-    'loser_rank': 'float64',
-    'loser_rank_points': 'float64',
-})
+MATCHES_SCHEMA = ibis.Schema({'tourney_id': 'string',
+                              'tourney_name': 'string',
+                              'surface': 'string',
+                              'draw_size': 'int32',
+                              'tourney_level': 'string',
+                              'tourney_date': 'int32',
+                              'match_num': 'int32',
+                              'winner_id': 'int32',
+                              'winner_seed': 'float64',
+                              'winner_entry': 'string',
+                              'winner_name': 'string',
+                              'winner_hand': 'string',
+                              'winner_ht': 'float64',
+                              'winner_ioc': 'string',
+                              'winner_age': 'float64',
+                              'loser_id': 'int32',
+                              'loser_seed': 'float64',
+                              'loser_entry': 'string',
+                              'loser_name': 'string',
+                              'loser_hand': 'string',
+                              'loser_ht': 'float64',
+                              'loser_ioc': 'string',
+                              'loser_age': 'float64',
+                              'score': 'string',
+                              'best_of': 'int32',
+                              'round': 'string',
+                              'minutes': 'float64',
+                              'w_ace': 'float64',
+                              'w_df': 'float64',
+                              'w_svpt': 'float64',
+                              'w_1stIn': 'float64',
+                              'w_1stWon': 'float64',
+                              'w_2ndWon': 'float64',
+                              'w_SvGm': 'float64',
+                              'w_bpSaved': 'float64',
+                              'w_bpFaced': 'float64',
+                              'l_ace': 'float64',
+                              'l_df': 'float64',
+                              'l_svpt': 'float64',
+                              'l_1stIn': 'float64',
+                              'l_1stWon': 'float64',
+                              'l_2ndWon': 'float64',
+                              'l_SvGm': 'float64',
+                              'l_bpSaved': 'float64',
+                              'l_bpFaced': 'float64',
+                              'winner_rank': 'float64',
+                              'winner_rank_points': 'float64',
+                              'loser_rank': 'float64',
+                              'loser_rank_points': 'float64'})
 
 # bronze.matches adds 'tour' to MATCHES_SCHEMA
 BRONZE_MATCHES_SCHEMA = ibis.Schema({**MATCHES_SCHEMA, 'tour': 'string'})
 
 # silver.matches: tourney_date promoted to date, tour added
-SILVER_MATCHES_SCHEMA = ibis.Schema({
-    **{k: v for k, v in MATCHES_SCHEMA.items() if k != 'tourney_date'},
-    'tourney_date': 'date',
-    'tour': 'string',
-})
+SILVER_MATCHES_SCHEMA = ibis.Schema({ **{k: v for k, v in MATCHES_SCHEMA.items() if k != 'tourney_date'},
+                                     'tourney_date': 'date',
+                                     'tour': 'string'})
 
-PLAYERS_SCHEMA = ibis.Schema({
-    'player_id': 'int32',
-    'first_name': 'string',
-    'last_name': 'string',
-    'hand': 'string',
-    'dob': 'float64',
-    'ioc': 'string',
-    'height': 'float64',
-    'wikidata_id': 'string',
-})
+PLAYERS_SCHEMA = ibis.Schema({'player_id': 'int32',
+                              'first_name': 'string',
+                              'last_name': 'string',
+                              'hand': 'string',
+                              'dob': 'float64',
+                              'ioc': 'string',
+                              'height': 'float64',
+                              'wikidata_id': 'string'})
 
 # silver.players adds 'full_name' and 'tour'
-SILVER_PLAYERS_SCHEMA = ibis.Schema({
-    **PLAYERS_SCHEMA,
-    'full_name': 'string',
-    'tour': 'string',
-})
+SILVER_PLAYERS_SCHEMA = ibis.Schema({**PLAYERS_SCHEMA,
+                                     'full_name': 'string',
+                                     'tour': 'string'})
 
-RANKINGS_SCHEMA = ibis.Schema({
-    'ranking_date': 'int32',
-    'ranking': 'int32',
-    'player_id': 'int32',
-    'points': 'float64',
-})
+RANKINGS_SCHEMA = ibis.Schema({'ranking_date': 'int32',
+                               'ranking': 'int32',
+                               'player_id': 'int32',
+                               'points': 'float64'})
 
 # silver.rankings: ranking_date promoted to date, tour added
-SILVER_RANKINGS_SCHEMA = ibis.Schema({
-    'ranking_date': 'date',
-    'ranking': 'int32',
-    'player_id': 'int32',
-    'points': 'float64',
-    'tour': 'string',
-})
+SILVER_RANKINGS_SCHEMA = ibis.Schema({'ranking_date': 'date',
+                                      'ranking': 'int32',
+                                      'player_id': 'int32',
+                                      'points': 'float64',
+                                      'tour': 'string'})
 
 
 def _build_table(evaluator: MacroEvaluator,
@@ -599,11 +579,9 @@ def _csv_bytes(rows: list[dict]) -> bytes:
     return pd.DataFrame(rows).to_csv(index=False).encode()
 
 
-MATCH_ROW = {
-    'tourney_id': '2024-540', 'tourney_name': 'Wimbledon', 'surface': 'Grass',
-    'tourney_date': 20240701, 'match_num': 1, 'winner_id': 104925, 'loser_id': 105453,
-    'score': '6-3 6-4',
-}
+MATCH_ROW = {'tourney_id': '2024-540', 'tourney_name': 'Wimbledon', 'surface': 'Grass',
+             'tourney_date': 20240701, 'match_num': 1, 'winner_id': 104925, 'loser_id': 105453,
+             'score': '6-3 6-4'}
 PLAYER_ROW = {'player_id': 104925, 'first_name': 'Novak', 'last_name': 'Djokovic'}
 RANKING_ROW = {'ranking_date': 20240701, 'ranking': 1, 'player_id': 104925, 'points': 9000}
 
@@ -779,167 +757,143 @@ Note: Run `just ingest` before `just run` to populate `data/01_raw/`.
 - [ ] **Step 1: Create models/raw/atp_matches.sql**
 
 ```sql
-MODEL (
-    name raw.atp_matches,
-    kind SEED (
-        path 'data/01_raw/atp_matches.csv'
-    ),
-    columns (
-        tourney_id TEXT,
-        tourney_name TEXT,
-        surface TEXT,
-        draw_size INT,
-        tourney_level TEXT,
-        tourney_date INT,
-        match_num INT,
-        winner_id INT,
-        winner_seed DOUBLE,
-        winner_entry TEXT,
-        winner_name TEXT,
-        winner_hand TEXT,
-        winner_ht DOUBLE,
-        winner_ioc TEXT,
-        winner_age DOUBLE,
-        loser_id INT,
-        loser_seed DOUBLE,
-        loser_entry TEXT,
-        loser_name TEXT,
-        loser_hand TEXT,
-        loser_ht DOUBLE,
-        loser_ioc TEXT,
-        loser_age DOUBLE,
-        score TEXT,
-        best_of INT,
-        round TEXT,
-        minutes DOUBLE,
-        w_ace DOUBLE,
-        w_df DOUBLE,
-        w_svpt DOUBLE,
-        w_1stIn DOUBLE,
-        w_1stWon DOUBLE,
-        w_2ndWon DOUBLE,
-        w_SvGm DOUBLE,
-        w_bpSaved DOUBLE,
-        w_bpFaced DOUBLE,
-        l_ace DOUBLE,
-        l_df DOUBLE,
-        l_svpt DOUBLE,
-        l_1stIn DOUBLE,
-        l_1stWon DOUBLE,
-        l_2ndWon DOUBLE,
-        l_SvGm DOUBLE,
-        l_bpSaved DOUBLE,
-        l_bpFaced DOUBLE,
-        winner_rank DOUBLE,
-        winner_rank_points DOUBLE,
-        loser_rank DOUBLE,
-        loser_rank_points DOUBLE
-    )
-);
+MODEL (name raw.atp_matches,
+       kind SEED (path 'data/01_raw/atp_matches.csv'),
+       columns (tourney_id TEXT,
+                tourney_name TEXT,
+                surface TEXT,
+                draw_size INT,
+                tourney_level TEXT,
+                tourney_date INT,
+                match_num INT,
+                winner_id INT,
+                winner_seed DOUBLE,
+                winner_entry TEXT,
+                winner_name TEXT,
+                winner_hand TEXT,
+                winner_ht DOUBLE,
+                winner_ioc TEXT,
+                winner_age DOUBLE,
+                loser_id INT,
+                loser_seed DOUBLE,
+                loser_entry TEXT,
+                loser_name TEXT,
+                loser_hand TEXT,
+                loser_ht DOUBLE,
+                loser_ioc TEXT,
+                loser_age DOUBLE,
+                score TEXT,
+                best_of INT,
+                round TEXT,
+                minutes DOUBLE,
+                w_ace DOUBLE,
+                w_df DOUBLE,
+                w_svpt DOUBLE,
+                w_1stIn DOUBLE,
+                w_1stWon DOUBLE,
+                w_2ndWon DOUBLE,
+                w_SvGm DOUBLE,
+                w_bpSaved DOUBLE,
+                w_bpFaced DOUBLE,
+                l_ace DOUBLE,
+                l_df DOUBLE,
+                l_svpt DOUBLE,
+                l_1stIn DOUBLE,
+                l_1stWon DOUBLE,
+                l_2ndWon DOUBLE,
+                l_SvGm DOUBLE,
+                l_bpSaved DOUBLE,
+                l_bpFaced DOUBLE,
+                winner_rank DOUBLE,
+                winner_rank_points DOUBLE,
+                loser_rank DOUBLE,
+                loser_rank_points DOUBLE));
 ```
 
 - [ ] **Step 2: Create models/raw/wta_matches.sql**
 
 ```sql
-MODEL (
-    name raw.wta_matches,
-    kind SEED (
-        path 'data/01_raw/wta_matches.csv'
-    ),
-    columns (
-        tourney_id TEXT,
-        tourney_name TEXT,
-        surface TEXT,
-        draw_size INT,
-        tourney_level TEXT,
-        tourney_date INT,
-        match_num INT,
-        winner_id INT,
-        winner_seed DOUBLE,
-        winner_entry TEXT,
-        winner_name TEXT,
-        winner_hand TEXT,
-        winner_ht DOUBLE,
-        winner_ioc TEXT,
-        winner_age DOUBLE,
-        loser_id INT,
-        loser_seed DOUBLE,
-        loser_entry TEXT,
-        loser_name TEXT,
-        loser_hand TEXT,
-        loser_ht DOUBLE,
-        loser_ioc TEXT,
-        loser_age DOUBLE,
-        score TEXT,
-        best_of INT,
-        round TEXT,
-        minutes DOUBLE,
-        w_ace DOUBLE,
-        w_df DOUBLE,
-        w_svpt DOUBLE,
-        w_1stIn DOUBLE,
-        w_1stWon DOUBLE,
-        w_2ndWon DOUBLE,
-        w_SvGm DOUBLE,
-        w_bpSaved DOUBLE,
-        w_bpFaced DOUBLE,
-        l_ace DOUBLE,
-        l_df DOUBLE,
-        l_svpt DOUBLE,
-        l_1stIn DOUBLE,
-        l_1stWon DOUBLE,
-        l_2ndWon DOUBLE,
-        l_SvGm DOUBLE,
-        l_bpSaved DOUBLE,
-        l_bpFaced DOUBLE,
-        winner_rank DOUBLE,
-        winner_rank_points DOUBLE,
-        loser_rank DOUBLE,
-        loser_rank_points DOUBLE
-    )
-);
+MODEL (name raw.wta_matches,
+       kind SEED (path 'data/01_raw/wta_matches.csv'),
+       columns (tourney_id TEXT,
+                tourney_name TEXT,
+                surface TEXT,
+                draw_size INT,
+                tourney_level TEXT,
+                tourney_date INT,
+                match_num INT,
+                winner_id INT,
+                winner_seed DOUBLE,
+                winner_entry TEXT,
+                winner_name TEXT,
+                winner_hand TEXT,
+                winner_ht DOUBLE,
+                winner_ioc TEXT,
+                winner_age DOUBLE,
+                loser_id INT,
+                loser_seed DOUBLE,
+                loser_entry TEXT,
+                loser_name TEXT,
+                loser_hand TEXT,
+                loser_ht DOUBLE,
+                loser_ioc TEXT,
+                loser_age DOUBLE,
+                score TEXT,
+                best_of INT,
+                round TEXT,
+                minutes DOUBLE,
+                w_ace DOUBLE,
+                w_df DOUBLE,
+                w_svpt DOUBLE,
+                w_1stIn DOUBLE,
+                w_1stWon DOUBLE,
+                w_2ndWon DOUBLE,
+                w_SvGm DOUBLE,
+                w_bpSaved DOUBLE,
+                w_bpFaced DOUBLE,
+                l_ace DOUBLE,
+                l_df DOUBLE,
+                l_svpt DOUBLE,
+                l_1stIn DOUBLE,
+                l_1stWon DOUBLE,
+                l_2ndWon DOUBLE,
+                l_SvGm DOUBLE,
+                l_bpSaved DOUBLE,
+                l_bpFaced DOUBLE,
+                winner_rank DOUBLE,
+                winner_rank_points DOUBLE,
+                loser_rank DOUBLE,
+                loser_rank_points DOUBLE));
 ```
 
 - [ ] **Step 3: Create models/raw/atp_players.sql**
 
 ```sql
-MODEL (
-    name raw.atp_players,
-    kind SEED (
-        path 'data/01_raw/atp_players.csv'
-    ),
-    columns (
-        player_id INT,
-        first_name TEXT,
-        last_name TEXT,
-        hand TEXT,
-        dob DOUBLE,
-        ioc TEXT,
-        height DOUBLE,
-        wikidata_id TEXT
-    )
-);
+MODEL (name raw.atp_players,
+       kind SEED (path 'data/01_raw/atp_players.csv'),
+       columns (player_id INT,
+                first_name TEXT,
+                last_name TEXT,
+                hand TEXT,
+                dob DOUBLE,
+                ioc TEXT,
+                height DOUBLE,
+                wikidata_id TEXT));
 ```
 
 - [ ] **Step 4: Create models/raw/wta_players.sql**
 
 ```sql
-MODEL (
-    name raw.wta_players,
-    kind SEED (
-        path 'data/01_raw/wta_players.csv'
-    ),
-    columns (
-        player_id INT,
-        first_name TEXT,
-        last_name TEXT,
-        hand TEXT,
-        dob DOUBLE,
-        ioc TEXT,
-        height DOUBLE,
-        wikidata_id TEXT
-    )
-);
+MODEL (name raw.wta_players,
+       kind SEED (path 'data/01_raw/wta_players.csv'),
+       columns (player_id INT,
+                first_name TEXT,
+                last_name TEXT,
+                hand TEXT,
+                dob DOUBLE,
+                ioc TEXT,
+                height DOUBLE,
+                wikidata_id TEXT));
 ```
 
 - [ ] **Step 5: Create models/raw/atp_rankings.sql**
@@ -947,33 +901,22 @@ MODEL (
 ```sql
 MODEL (
     name raw.atp_rankings,
-    kind SEED (
-        path 'data/01_raw/atp_rankings.csv'
-    ),
-    columns (
-        ranking_date INT,
-        ranking INT,
-        player_id INT,
-        points DOUBLE
-    )
-);
+    kind SEED (path 'data/01_raw/atp_rankings.csv'),
+    columns (ranking_date INT,
+             ranking INT,
+             player_id INT,
+             points DOUBLE));
 ```
 
 - [ ] **Step 6: Create models/raw/wta_rankings.sql**
 
 ```sql
-MODEL (
-    name raw.wta_rankings,
-    kind SEED (
-        path 'data/01_raw/wta_rankings.csv'
-    ),
-    columns (
-        ranking_date INT,
-        ranking INT,
-        player_id INT,
-        points DOUBLE
-    )
-);
+MODEL (name raw.wta_rankings,
+       kind SEED (path 'data/01_raw/wta_rankings.csv'),
+       columns (ranking_date INT,
+                ranking INT,
+                player_id INT,
+                points DOUBLE));
 ```
 
 - [ ] **Step 7: Verify SQLmesh parses models**
@@ -1253,7 +1196,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     atp = _build_table(evaluator, catalog, 'atp_matches', 'raw', MATCHES_SCHEMA)
     wta = _build_table(evaluator, catalog, 'wta_matches', 'raw', MATCHES_SCHEMA)
 
-    return ibis.union(atp.mutate(tour=ibis.literal('ATP')), wta.mutate(tour=ibis.literal('WTA')),
+    return ibis.union(atp.mutate(tour=ibis.literal('ATP')),
+                      wta.mutate(tour=ibis.literal('WTA')),
                       distinct=False) \
         .to_sql(dialect='duckdb')
 ```
@@ -1282,7 +1226,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     atp = _build_table(evaluator, catalog, 'atp_players', 'raw', PLAYERS_SCHEMA)
     wta = _build_table(evaluator, catalog, 'wta_players', 'raw', PLAYERS_SCHEMA)
 
-    return ibis.union(atp.mutate(tour=ibis.literal('ATP')), wta.mutate(tour=ibis.literal('WTA')),
+    return ibis.union(atp.mutate(tour=ibis.literal('ATP')),
+                      wta.mutate(tour=ibis.literal('WTA')),
                       distinct=False) \
         .to_sql(dialect='duckdb')
 ```
@@ -1311,7 +1256,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     atp = _build_table(evaluator, catalog, 'atp_rankings', 'raw', RANKINGS_SCHEMA)
     wta = _build_table(evaluator, catalog, 'wta_rankings', 'raw', RANKINGS_SCHEMA)
 
-    return ibis.union(atp.mutate(tour=ibis.literal('ATP')), wta.mutate(tour=ibis.literal('WTA')),
+    return ibis.union(atp.mutate(tour=ibis.literal('ATP')),
+                      wta.mutate(tour=ibis.literal('WTA')),
                       distinct=False) \
         .to_sql(dialect='duckdb')
 ```
@@ -1527,7 +1473,7 @@ from sqlmesh.core.macros import MacroEvaluator
 from sqlmesh.core.model import model
 
 from models._util import BRONZE_MATCHES_SCHEMA, GATEWAY_CATALOG, _build_table
-
+from ibis import _
 
 @model('silver.matches',
        is_sql=True,
@@ -1541,14 +1487,14 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     bronze = _build_table(evaluator, catalog, 'matches', 'bronze', BRONZE_MATCHES_SCHEMA)
 
-    surface_clean = bronze.surface \
-        .lower() \
-        .cases(('hard', 'Hard'), ('clay', 'Clay'), ('grass', 'Grass'),
-               ('carpet', 'Carpet'), else_=bronze.surface)
     result = bronze \
-        .filter(bronze.score.notnull()) \
-        .mutate(tourney_date=bronze.tourney_date.cast('string').to_timestamp('%Y%m%d').date(),
-                surface=surface_clean)
+        .filter(_['score'].notnull()) \
+        .mutate(tourney_date=_['tourney_date'].cast('string').to_timestamp('%Y%m%d').date(),
+                surface=_['surface'].lower().cases((('hard', 'Hard'),
+                                                    ('clay', 'Clay'),
+                                                    ('grass', 'Grass'),
+                                                    ('carpet', 'Carpet'),
+                                                    else_=bronze.surface)))
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1560,7 +1506,7 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 import ibis
 from sqlmesh.core.macros import MacroEvaluator
 from sqlmesh.core.model import model
-
+from ibis import _
 from models._util import GATEWAY_CATALOG, PLAYERS_SCHEMA, _build_table
 
 # bronze.players has all PLAYERS_SCHEMA columns plus 'tour'
@@ -1580,7 +1526,7 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     bronze = _build_table(evaluator, catalog, 'players', 'bronze', _BRONZE_PLAYERS_SCHEMA)
 
     result = bronze \
-        .filter(bronze.player_id.notnull()) \
+        .filter(_bronze_['player_id'].notnull()) \
         .mutate(full_name=(bronze.first_name + ibis.literal(' ') + bronze.last_name).strip())
 
     return result.to_sql(dialect='duckdb')
@@ -1595,6 +1541,7 @@ from sqlmesh.core.macros import MacroEvaluator
 from sqlmesh.core.model import model
 
 from models._util import GATEWAY_CATALOG, RANKINGS_SCHEMA, _build_table
+from ibis import _
 
 _BRONZE_RANKINGS_SCHEMA = ibis.Schema({**RANKINGS_SCHEMA, 'tour': 'string'})
 
@@ -1611,7 +1558,8 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     bronze = _build_table(evaluator, catalog, 'rankings', 'bronze', _BRONZE_RANKINGS_SCHEMA)
 
-    result = bronze.mutate(ranking_date=bronze.ranking_date.cast('string').to_timestamp('%Y%m%d').date())
+    result = bronze \
+        .mutate(ranking_date=_['ranking_date'].cast('string').to_timestamp('%Y%m%d').date())
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1838,7 +1786,7 @@ from sqlmesh.core.macros import MacroEvaluator
 from sqlmesh.core.model import model
 
 from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
-
+from ibis import _
 
 @model('gold.player_surface_stats',
        is_sql=True,
@@ -1853,22 +1801,24 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     wins = matches \
         .group_by(['winner_id', 'tour', 'surface']) \
-        .aggregate(wins=matches.match_num.count()) \
+        .aggregate(wins=_['match_num'].count()) \
         .rename(player_id='winner_id')
     losses = matches \
         .group_by(['loser_id', 'tour', 'surface']) \
-        .aggregate(losses=matches.match_num.count()) \
+        .aggregate(losses=_['match_num'].count()) \
         .rename(player_id='loser_id')
-    joined = wins.outer_join(losses, ['player_id', 'tour', 'surface'])
-    resolved = joined.mutate(player_id=ibis.coalesce(wins.player_id, losses.player_id),
-                             tour=ibis.coalesce(wins.tour, losses.tour),
-                             surface=ibis.coalesce(wins.surface, losses.surface),
-                             wins=wins.wins.fillna(0).cast('int64'),
-                             losses=losses.losses.fillna(0).cast('int64'))
+    joined = wins \
+        .outer_join(losses, ['player_id', 'tour', 'surface'])
+    resolved = joined \
+        .mutate(player_id=ibis.coalesce(wins['player_id'], losses['player_id']),
+                tour=ibis.coalesce(wins['tour'], losses['tour']),
+                surface=ibis.coalesce(wins['surface'], losses['surface']),
+                wins=_['wins'].fillna(0).cast('int64'),
+                losses=_['losses'].fillna(0).cast('int64'))
     result = resolved \
-        .mutate(matches_played=ibis._.wins + ibis._.losses,
-                win_rate=(ibis._.wins.cast('float64') / (ibis._.wins + ibis._.losses))) \
-        [['player_id', 'tour', 'surface', 'wins', 'losses', 'matches_played', 'win_rate']]
+        .mutate(matches_played=_['wins'] + _['losses'],
+                win_rate=(_['wins'].cast('float64') / (_['wins'] + _['losses']))) \
+        .select(['player_id', 'tour', 'surface', 'wins', 'losses', 'matches_played', 'win_rate'])
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1882,7 +1832,7 @@ from sqlmesh.core.macros import MacroEvaluator
 from sqlmesh.core.model import model
 
 from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
-
+from ibis import _
 
 @model('gold.head_to_head',
        is_sql=True,
@@ -1895,14 +1845,15 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     matches = _build_table(evaluator, catalog, 'matches', 'silver', SILVER_MATCHES_SCHEMA)
 
-    canonical = matches.mutate(player1_id=ibis.least(matches.winner_id, matches.loser_id),
-                               player2_id=ibis.greatest(matches.winner_id, matches.loser_id),
-                               player1_won=(matches.winner_id < matches.loser_id).cast('int64'))
+    canonical = matches \
+        .mutate(player1_id=ibis.least(_['winner_id'], _['loser_id']),
+                player2_id=ibis.greatest(_['winner_id'], _['loser_id']),
+                player1_won=(_['winner_id'] < _['loser_id']).cast('int64'))
     result = canonical \
         .group_by(['player1_id', 'player2_id', 'tour']) \
-        .aggregate(player1_wins=canonical.player1_won.sum(),
-                   total_matches=canonical.match_num.count()) \
-        .mutate(player2_wins=ibis._.total_matches - ibis._.player1_wins)
+        .aggregate(player1_wins=_['player1_won'].sum(),
+                   total_matches=['match_num'].count()) \
+        .mutate(player2_wins=_['total_matches'] - _['player1_wins'])
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1931,7 +1882,7 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
     rankings = _build_table(evaluator, catalog, 'rankings', 'silver', SILVER_RANKINGS_SCHEMA)
 
     career_window = ibis.window(group_by=['player_id', 'tour'], order_by='ranking_date')
-    result = rankings.mutate(career_best_rank=rankings.ranking.min().over(career_window))
+    result = rankings.mutate(career_best_rank=_['ranking'].min().over(career_window))
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -1958,12 +1909,13 @@ def entrypoint(evaluator: MacroEvaluator) -> str:
 
     matches = _build_table(evaluator, catalog, 'matches', 'silver', SILVER_MATCHES_SCHEMA)
 
-    matches_with_year = matches.mutate(tourney_year=matches.tourney_date.year())
+    matches_with_year = matches \
+        .mutate(tourney_year=_['tourney_date'].year())
     result = matches_with_year \
         .group_by(['tourney_id', 'tourney_name', 'surface', 'tour', 'tourney_year']) \
-        .aggregate(matches_played=matches_with_year.match_num.count(),
-                   avg_match_minutes=matches_with_year.minutes.mean(),
-                   distinct_winners=matches_with_year.winner_id.nunique())
+        .aggregate(matches_played=_['match_num'].count(),
+                   avg_match_minutes=_['minutes'].mean(),
+                   distinct_winners=_['winner_id'].nunique())
 
     return result.to_sql(dialect='duckdb')
 ```
@@ -2066,11 +2018,11 @@ def validate_raw_matches(con: ibis.BaseBackend | None = None) -> pb.Validate:
     """Validate raw.atp_matches and raw.wta_matches have required columns non-null."""
     _con = con or get_connection()
     atp = _con.table('atp_matches', database='my_lakehouse.raw')
-    v = pb.Validate(data=atp, tbl_name='raw.atp_matches', label='Raw ATP Matches')
-    v = v.col_vals_not_null(columns='tourney_id')
-    v = v.col_vals_not_null(columns='winner_id')
-    v = v.col_vals_not_null(columns='loser_id')
-    v = v.col_vals_not_null(columns='tourney_date')
+    v = pb.Validate(data=atp, tbl_name='raw.atp_matches', label='Raw ATP Matches') \
+        .col_vals_not_null(columns='tourney_id') \
+        .col_vals_not_null(columns='winner_id') \
+        .col_vals_not_null(columns='loser_id') \
+        .col_vals_not_null(columns='tourney_date')
     return v.interrogate()
 
 
@@ -2078,12 +2030,12 @@ def validate_bronze_matches(con: ibis.BaseBackend | None = None) -> pb.Validate:
     """Validate bronze.matches: no duplicate unique keys, tour column valid."""
     _con = con or get_connection()
     table = _con.table('matches', database='my_lakehouse.bronze')
-    v = pb.Validate(data=table, tbl_name='bronze.matches', label='Bronze Matches')
-    v = v.col_vals_not_null(columns='tourney_id')
-    v = v.col_vals_not_null(columns='match_num')
-    v = v.col_vals_not_null(columns='tour')
-    v = v.col_vals_in_set(columns='tour', set=['ATP', 'WTA'])
-    v = v.rows_distinct(columns_subset=['tourney_id', 'match_num', 'tour'])
+    v = pb.Validate(data=table, tbl_name='bronze.matches', label='Bronze Matches') \
+        .col_vals_not_null(columns='tourney_id') \
+        .col_vals_not_null(columns='match_num') \
+        .col_vals_not_null(columns='tour') \
+        .col_vals_in_set(columns='tour', set=['ATP', 'WTA']) \
+        .rows_distinct(columns_subset=['tourney_id', 'match_num', 'tour'])
     return v.interrogate()
 
 
@@ -2091,10 +2043,10 @@ def validate_silver_matches(con: ibis.BaseBackend | None = None) -> pb.Validate:
     """Validate silver.matches: surface in known set, no null scores."""
     _con = con or get_connection()
     table = _con.table('matches', database='my_lakehouse.silver')
-    v = pb.Validate(data=table, tbl_name='silver.matches', label='Silver Matches')
-    v = v.col_vals_not_null(columns='score')
-    v = v.col_vals_in_set(columns='surface', set=['Hard', 'Clay', 'Grass', 'Carpet'])
-    v = v.col_vals_not_null(columns='tourney_date')
+    v = pb.Validate(data=table, tbl_name='silver.matches', label='Silver Matches') \
+        .col_vals_not_null(columns='score') \
+        .col_vals_in_set(columns='surface', set=['Hard', 'Clay', 'Grass', 'Carpet']) \
+        .col_vals_not_null(columns='tourney_date')
     return v.interrogate()
 
 
@@ -2102,10 +2054,10 @@ def validate_gold_surface_stats(con: ibis.BaseBackend | None = None) -> pb.Valid
     """Validate gold.player_surface_stats: win_rate in [0, 1], matches_played > 0."""
     _con = con or get_connection()
     table = _con.table('player_surface_stats', database='my_lakehouse.gold')
-    v = pb.Validate(data=table, tbl_name='gold.player_surface_stats', label='Gold Surface Stats')
-    v = v.col_vals_between(columns='win_rate', left=0.0, right=1.0)
-    v = v.col_vals_gt(columns='matches_played', value=0)
-    v = v.rows_distinct(columns_subset=['player_id', 'surface', 'tour'])
+    v = pb.Validate(data=table, tbl_name='gold.player_surface_stats', label='Gold Surface Stats') \
+        .col_vals_between(columns='win_rate', left=0.0, right=1.0) \
+        .col_vals_gt(columns='matches_played', value=0) \
+        .rows_distinct(columns_subset=['player_id', 'surface', 'tour'])
     return v.interrogate()
 ```
 
@@ -2119,24 +2071,20 @@ import sys
 
 from loguru import logger
 
-from validations.checks import (
-    validate_bronze_matches,
-    validate_gold_surface_stats,
-    validate_raw_matches,
-    validate_silver_matches,
-)
+from validations.checks import (validate_bronze_matches,
+                                validate_gold_surface_stats,
+                                validate_raw_matches,
+                                validate_silver_matches)
 from validations.connection import get_connection
 
 
 def main() -> None:
     """Run all layer validations. Exit 1 if any check fails."""
     con = get_connection()
-    checks = [
-        validate_raw_matches(con),
-        validate_bronze_matches(con),
-        validate_silver_matches(con),
-        validate_gold_surface_stats(con),
-    ]
+    checks = [validate_raw_matches(con),
+              validate_bronze_matches(con),
+              validate_silver_matches(con),
+              validate_gold_surface_stats(con)]
     failed = [v for v in checks if not v.all_passed()]
     if failed:
         for v in failed:
