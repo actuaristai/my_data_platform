@@ -1,3 +1,19 @@
-# Put parameters here in form of TOML
-
 LOGURU_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'
+
+[ducklake]
+catalog_path = "data/catalog.ducklake"
+data_path = "data/storage"
+
+[sqlmesh]
+state_db = "data/sqlmesh_state.db"
+
+[pins]
+board_type = "local"
+board_path = "data/pins_board"
+
+[tennis]
+year_start = 2015
+year_end = 2025
+tours = ["atp", "wta"]
+atp_url = "https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master"
+wta_url = "https://raw.githubusercontent.com/JeffSackmann/tennis_wta/master"

@@ -1,0 +1,38 @@
+gateways:
+  local_gateway:
+    connection:
+      type: duckdb
+      catalogs:
+        my_lakehouse:
+          type: ducklake
+          path: data/catalog.ducklake
+          data_path: data/storage
+      extensions:
+        - ducklake
+    state_connection:
+      type: duckdb
+      database: data/sqlmesh_state.db
+
+  motherduck:
+    connection:
+      type: motherduck
+      catalogs:
+        my_lakehouse: "md:my_lakehouse"
+      token: "{{ env_var('MOTHERDUCK_TOKEN') }}"
+    state_connection:
+      type: motherduck
+      database: "md:sqlmesh_state"
+
+default_gateway: local_gateway
+
+model_defaults:
+  dialect: duckdb
+  start: 2015-01-01
+  cron: '@daily'
+
+linter:
+  enabled: true
+  rules:
+    - ambiguousorinvalidcolumn
+    - invalidselectstarexpansion
+    - noambiguousprojections
