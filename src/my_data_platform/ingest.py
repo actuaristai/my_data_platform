@@ -36,7 +36,15 @@ def main() -> None:
 
 
 def _etag_paths(etag_dir: Path, url: str) -> tuple[Path, Path]:
-    """Return (content_cache_path, etag_sidecar_path) for a URL."""
+    """Return (content_cache_path, etag_sidecar_path) for a URL.
+
+    Args:
+        etag_dir: Directory that holds ETag sidecar files and content cache files.
+        url: The remote URL; its filename component is used as the cache key.
+
+    Returns:
+        A ``(content_cache_path, etag_sidecar_path)`` tuple, both inside ``etag_dir``.
+    """
     name = url.rsplit('/', 1)[-1]
     return etag_dir / name, etag_dir / f'{name}.etag'
 
@@ -90,7 +98,16 @@ def _fetch_with_etag(url: str, etag_dir: Path) -> bytes | None:
 
 def _concat_to_csv(contents: list[bytes], output_path: Path,
                    rename: dict[str, str] | None = None) -> int:
-    """Concatenate CSV byte blobs in-memory via polars and write to output_path."""
+    """Concatenate CSV byte blobs in-memory via polars and write to output_path.
+
+    Args:
+        contents: Raw CSV bytes to concatenate; must share the same column structure.
+        output_path: Destination path for the merged CSV file.
+        rename: Optional mapping of ``{old_name: new_name}`` applied after concatenation.
+
+    Returns:
+        Total number of rows in the concatenated output.
+    """
     frames = [pl.read_csv(io.BytesIO(c), infer_schema_length=0) for c in contents]
     result = pl.concat(frames)
     if rename:

@@ -1,0 +1,24 @@
+# ingest.download_tour_rankings { #my_data_platform.ingest.download_tour_rankings }
+
+```python
+ingest.download_tour_rankings(
+    tour,
+    base_url,
+    year_start,
+    year_end,
+    output_path,
+    etag_dir=None,
+)
+```
+
+Download and concatenate decade rankings CSVs into a single file.
+
+JeffSackmann's repo uses decade files (e.g. atp_rankings_10s.csv, atp_rankings_20s.csv).
+
+Args:
+    tour: Tour identifier ('atp' or 'wta').
+    base_url: Base URL of the JeffSackmann GitHub repo for this tour.
+    year_start: First year to include (determines which decades to fetch).
+    year_end: Last year to include (determines which decades to fetch).
+    output_path: Destination CSV path.
+    etag_dir: Directory for ETag cache; defaults to output_path.parent/.etags.

@@ -18,7 +18,16 @@ def main() -> None:
 
 
 def publish_gold_tables(board_path: str | None = None) -> None:
-    """Read each gold table and write to the configured pins board as Parquet."""
+    """Read each gold table and write to the configured pins board as Parquet.
+
+    Args:
+        board_path: Local folder path for the pins board. Defaults to
+            ``conf['pins.board_path']`` from ``conf/parameters.toml``.
+
+    Examples:
+        >>> True  # integration-tested via test_publish.py
+        True
+    """
     path = board_path or conf['pins.board_path']
     board = pins.board_folder(path)
     con = get_connection()

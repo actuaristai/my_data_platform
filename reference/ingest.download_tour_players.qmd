@@ -1,0 +1,13 @@
+# ingest.download_tour_players { #my_data_platform.ingest.download_tour_players }
+
+```python
+ingest.download_tour_players(tour, base_url, output_path, etag_dir=None)
+```
+
+Download the players master CSV for a tour.
+
+Args:
+    tour: Tour identifier ('atp' or 'wta').
+    base_url: Base URL of the JeffSackmann GitHub repo for this tour.
+    output_path: Destination CSV path.
+    etag_dir: Directory for ETag cache; defaults to output_path.parent/.etags.

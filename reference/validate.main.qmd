@@ -1,0 +1,7 @@
+# validate.main { #my_data_platform.validate.main }
+
+```python
+validate.main()
+```
+
+Run all layer validations. Exit 1 if any check fails.

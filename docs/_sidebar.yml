@@ -3,7 +3,17 @@ website:
   - contents:
     - reference/index.qmd
     - contents:
-      - reference/hello.qmd
-      section: API reference
+      - reference/ingest.main.qmd
+      - reference/ingest.download_tour_matches.qmd
+      - reference/ingest.download_tour_players.qmd
+      - reference/ingest.download_tour_rankings.qmd
+      section: Ingest
+    - contents:
+      - reference/validate.main.qmd
+      section: Validate
+    - contents:
+      - reference/publish.main.qmd
+      - reference/publish.publish_gold_tables.qmd
+      section: Publish
     id: reference
   - id: dummy-sidebar

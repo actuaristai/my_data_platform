@@ -1,0 +1,7 @@
+# publish.main { #my_data_platform.publish.main }
+
+```python
+publish.main()
+```
+
+Entry point for just publish.

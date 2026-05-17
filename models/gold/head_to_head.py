@@ -9,6 +9,8 @@ from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
 @model('gold.head_to_head',
        is_sql=True,
        kind='FULL',
+       grain=['player1_id', 'player2_id', 'tour'],
+       references=['player1_id AS player_id', 'player2_id AS player_id'],
        description='H2H records: wins for player1 vs player2 (player1_id < player2_id).')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Count wins for each canonical (player1, player2) pair where player1_id < player2_id."""

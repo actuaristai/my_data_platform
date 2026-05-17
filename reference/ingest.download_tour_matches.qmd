@@ -1,0 +1,22 @@
+# ingest.download_tour_matches { #my_data_platform.ingest.download_tour_matches }
+
+```python
+ingest.download_tour_matches(
+    tour,
+    base_url,
+    year_start,
+    year_end,
+    output_path,
+    etag_dir=None,
+)
+```
+
+Download and concatenate per-year match CSVs into a single file.
+
+Args:
+    tour: Tour identifier ('atp' or 'wta').
+    base_url: Base URL of the JeffSackmann GitHub repo for this tour.
+    year_start: First year to include.
+    year_end: Last year to include (inclusive).
+    output_path: Destination CSV path.
+    etag_dir: Directory for ETag cache; defaults to output_path.parent/.etags.

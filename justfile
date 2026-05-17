@@ -114,3 +114,6 @@ clean:
     Remove-Item -Path "__pycache__" -Recurse -Confirm -Erroraction 'silentlycontinue'
     Remove-Item -Path ".quarto" -Recurse -Confirm -Erroraction 'silentlycontinue'
     Get-ChildItem -Path . -Filter "__pycache__" -Recurse -Directory | Remove-Item -Recurse -Force
+
+duckdb:
+    uvx --from duckdb-cli duckdb.exe -ui -init scripts/duckdb_init.sql

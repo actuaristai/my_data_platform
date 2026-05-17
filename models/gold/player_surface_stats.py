@@ -9,6 +9,8 @@ from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
 @model('gold.player_surface_stats',
        is_sql=True,
        kind='FULL',
+       grain=['player_id', 'tour', 'surface'],
+       references=['player_id'],
        description='Win rate, wins, losses, and matches played per player per surface.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Calculate win/loss record and win_rate per player, tour, and surface."""

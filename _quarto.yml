@@ -9,19 +9,25 @@ metadata-files:
 
 
 quartodoc:
-  # the name used to import the package you want to create reference docs for
   package: my_data_platform
-
-  # write sidebar data to this file
   sidebar: docs/_sidebar.yml
-
   sections:
-    - title: API reference
-      desc: Functions to inspect docstrings.
+    - title: Ingest
+      desc: Download raw ATP/WTA CSVs from GitHub into data/01_raw/.
       contents:
-        # the functions being documented in the package.
-        # you can refer to anything: class methods, modules, etc..
-        - hello
+        - ingest.main
+        - ingest.download_tour_matches
+        - ingest.download_tour_players
+        - ingest.download_tour_rankings
+    - title: Validate
+      desc: Run pointblank validation checks across all layers.
+      contents:
+        - validate.main
+    - title: Publish
+      desc: Push gold tables to the pins board for downstream consumers.
+      contents:
+        - publish.main
+        - publish.publish_gold_tables
 
 website:
   navbar:
@@ -29,6 +35,8 @@ website:
     search: true
     title: Docs
     left:
+      - text: "Data Product"
+        file: docs/data_product.qmd
       - text: "Reference API"
         file: reference/index.qmd
 
