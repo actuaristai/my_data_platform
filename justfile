@@ -43,6 +43,11 @@ publish:
 
 # --- Quality ---
 
+# Upgrade ruff, commitizen, autopep8 and sync pre-commit hook revs
+sync-hooks:
+    uv add --upgrade ruff commitizen autopep8
+    uv run pre-commit autoupdate
+
 # Lint using ruff + sqlmesh
 lint:
     uv run --only-group lint ruff check src/{{PROJECT_NAME}} --fix
