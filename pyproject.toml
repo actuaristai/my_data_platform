@@ -8,28 +8,30 @@ version = "0.1.0"
 description = "Opinionated guide to best practices set up of open source data platform with best data engineering practices"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["duckdb>=1.2.0",
-                 "dynaconf>=3.2.10",
-                 "griffe<1.0.0",
-                 "ibis-framework[duckdb]>=11.0.0",
-                 "ipykernel>=6.29.5",
-                 "loguru>=0.7.3",
-                 "nbclient>=0.10.2",
-                 "nbformat>=5.10.4",
-                 "pins>=0.9.1",
-                 "pointblank>=0.17.0",
-                 "polars>=1.0.0",
-                 "pytest>=8.3.5",
-                 "pytest-cov>=6.0.0",
-                 "quartodoc>=0.9.1",
-                 "requests>=2.32.0",
-                 "ruff>=0.11.2",
-                 "sqlmesh[duckdb]>=0.228.2",
-                 "toml>=0.10.2",
-                 "typer>=0.15.2",
-                 "autopep8>=2.3.2",
-                 "commitizen>=4.4.1",
-                 "yapf>=0.43.0"]
+dependencies = [
+    "duckdb>=1.2.0",
+    "dynaconf>=3.2.10",
+    "griffe<1.0.0",
+    "ibis-framework[duckdb]>=11.0.0",
+    "ipykernel>=6.29.5",
+    "loguru>=0.7.3",
+    "nbclient>=0.10.2",
+    "nbformat>=5.10.4",
+    "pins>=0.9.1",
+    "pointblank>=0.17.0",
+    "polars>=1.0.0",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
+    "quartodoc>=0.9.1",
+    "requests>=2.32.0",
+    "ruff>=0.11.2",
+    "sqlmesh[duckdb]>=0.228.2",
+    "toml>=0.10.2",
+    "typer>=0.15.2",
+    "autopep8>=2.3.2",
+    "commitizen>=4.4.1",
+    "yapf>=0.43.0",
+]
 
 [[project.authors]]
 name = "Actuarist AI"
