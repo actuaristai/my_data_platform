@@ -114,3 +114,10 @@ clean:
     Remove-Item -Path "__pycache__" -Recurse -Confirm -Erroraction 'silentlycontinue'
     Remove-Item -Path ".quarto" -Recurse -Confirm -Erroraction 'silentlycontinue'
     Get-ChildItem -Path . -Filter "__pycache__" -Recurse -Directory | Remove-Item -Recurse -Force
+
+duckdb:
+    #!{{POWERSHELL_SHEBANG}}
+    $tmp = New-TemporaryFile
+    "ATTACH 'ducklake:data/catalog.ducklake' AS my_lakehouse;" | Set-Content $tmp
+    uvx --from duckdb-cli duckdb.exe -ui -init $tmp
+    Remove-Item $tmp
