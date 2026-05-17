@@ -12,6 +12,7 @@ _BRONZE_PLAYERS_SCHEMA: dict[str, str] = {**PLAYERS_SCHEMA, 'tour': 'string'}
 @model('silver.players',
        is_sql=True,
        kind={'name': ModelKindName.INCREMENTAL_BY_UNIQUE_KEY, 'unique_key': ['player_id', 'tour']},
+       grain=['player_id', 'tour'],
        description='Player roster with full_name derived, null player_id rows removed.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Derive full_name, drop rows with null player_id."""

@@ -9,6 +9,8 @@ from models._util import BRONZE_MATCHES_SCHEMA, GATEWAY_CATALOG, _build_table
 @model('silver.matches',
        is_sql=True,
        kind={'name': ModelKindName.INCREMENTAL_BY_TIME_RANGE, 'time_column': 'tourney_date'},
+       grain=['tourney_id', 'match_num', 'tour'],
+       references=['winner_id AS player_id', 'loser_id AS player_id'],
        description='Cleaned matches: date cast, surface normalised, null scores removed.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Cast tourney_date to DATE, normalise surface, try-cast seed columns, drop null scores."""

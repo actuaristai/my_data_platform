@@ -11,6 +11,8 @@ _BRONZE_RANKINGS_SCHEMA: dict[str, str] = {**RANKINGS_SCHEMA, 'tour': 'string'}
 @model('silver.rankings',
        is_sql=True,
        kind={'name': ModelKindName.INCREMENTAL_BY_TIME_RANGE, 'time_column': 'ranking_date'},
+       grain=['ranking_date', 'player_id', 'tour'],
+       references=['player_id'],
        description='Weekly rankings with ranking_date cast to DATE.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Cast ranking_date from YYYYMMDD int to DATE."""
