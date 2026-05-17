@@ -8,6 +8,7 @@ from models._util import GATEWAY_CATALOG, SILVER_MATCHES_SCHEMA, _build_table
 @model('gold.tournament_stats',
        is_sql=True,
        kind='FULL',
+       grain=['tourney_id', 'tourney_name', 'surface', 'tour', 'tourney_year'],
        description='Match count, avg duration, and distinct winner count per tournament.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Aggregate matches by tourney_id, name, surface, and year."""

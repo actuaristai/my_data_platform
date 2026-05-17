@@ -10,6 +10,8 @@ from models._util import GATEWAY_CATALOG, SILVER_RANKINGS_SCHEMA, _build_table
 @model('gold.rankings_history',
        is_sql=True,
        kind={'name': ModelKindName.INCREMENTAL_BY_TIME_RANGE, 'time_column': 'ranking_date'},
+       grain=['ranking_date', 'player_id', 'tour'],
+       references=['player_id'],
        description='Weekly ranking snapshots with best-ever rank per player.')
 def entrypoint(evaluator: MacroEvaluator) -> str:
     """Pass through silver rankings and add career_best_rank window column."""
