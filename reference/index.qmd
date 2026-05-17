@@ -1,9 +1,29 @@
 # Function reference {.doc .doc-index}
 
-## API reference
+## Ingest
 
-Functions to inspect docstrings.
+Download raw ATP/WTA CSVs from GitHub into data/01_raw/.
 
 | | |
 | --- | --- |
-| [hello](hello.qmd#my_data_platform.hello) | Start here for scripts. |
+| [ingest.main](ingest.main.qmd#my_data_platform.ingest.main) | Entry point: download all raw tennis data to data/01_raw/. |
+| [ingest.download_tour_matches](ingest.download_tour_matches.qmd#my_data_platform.ingest.download_tour_matches) | Download and concatenate per-year match CSVs into a single file. |
+| [ingest.download_tour_players](ingest.download_tour_players.qmd#my_data_platform.ingest.download_tour_players) | Download the players master CSV for a tour. |
+| [ingest.download_tour_rankings](ingest.download_tour_rankings.qmd#my_data_platform.ingest.download_tour_rankings) | Download and concatenate decade rankings CSVs into a single file. |
+
+## Validate
+
+Run pointblank validation checks across all layers.
+
+| | |
+| --- | --- |
+| [validate.main](validate.main.qmd#my_data_platform.validate.main) | Run all layer validations. Exit 1 if any check fails. |
+
+## Publish
+
+Push gold tables to the pins board for downstream consumers.
+
+| | |
+| --- | --- |
+| [publish.main](publish.main.qmd#my_data_platform.publish.main) | Entry point for just publish. |
+| [publish.publish_gold_tables](publish.publish_gold_tables.qmd#my_data_platform.publish.publish_gold_tables) | Read each gold table and write to the configured pins board as Parquet. |

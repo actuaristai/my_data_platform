@@ -1,0 +1,15 @@
+# publish.publish_gold_tables { #my_data_platform.publish.publish_gold_tables }
+
+```python
+publish.publish_gold_tables(board_path=None)
+```
+
+Read each gold table and write to the configured pins board as Parquet.
+
+Args:
+    board_path: Local folder path for the pins board. Defaults to
+        ``conf['pins.board_path']`` from ``conf/parameters.toml``.
+
+Examples:
+    >>> True  # integration-tested via test_publish.py
+    True

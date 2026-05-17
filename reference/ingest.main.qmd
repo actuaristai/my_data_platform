@@ -1,0 +1,7 @@
+# ingest.main { #my_data_platform.ingest.main }
+
+```python
+ingest.main()
+```
+
+Entry point: download all raw tennis data to data/01_raw/.
