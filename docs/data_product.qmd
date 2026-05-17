@@ -1,24 +1,155 @@
 ---
 title: "my_data_platform"
-format: 
+subtitle: "ATP/WTA Tennis Data Platform"
+format:
     html:
         number-sections: true
         html-table-processing: none
-jupyter: my_data_platform # uv run python -m ipykernel install --user --name my_data_platform
+jupyter: my_data_platform
 echo: false
 execute:
-  freeze: auto  # re-render only when source changes
+  freeze: auto
 ---
 
-# Executive Summary
+## Executive Summary
 
-This document summarises the my_data_platform ...
+Open-source ATP/WTA tennis data platform built on DuckLake, SQLmesh, and ibis.
+Raw CSV data from JeffSackmann's GitHub repository flows through bronze → silver → gold
+layers. Gold tables expose player surface stats, head-to-head records, ranking history,
+and tournament statistics.
 
-Opinionated guide to best practices set up of open source data platform with best data engineering practices
+- **Repository:** git@github.com:actuaristai/my_data_platform.git
+- **Author:** Actuarist AI
+- **Stack:** DuckLake · SQLmesh · ibis · pointblank · Quarto
 
-## Key info
+## Database Overview
 
--   Repository name: my_data_platform
--   Author: Actuarist AI
--   Repository location: git@github.com:actuaristai/my_data_platform.git
+```{python}
+import pandas as pd
+from validations.connection import get_connection
 
+con = get_connection()
+schemas = ['bronze', 'silver', 'gold']
+rows = []
+for schema in schemas:
+    tables = sorted(con.list_tables(database=f'my_lakehouse.{schema}'))
+    for table in tables:
+        t = con.table(table, database=f'my_lakehouse.{schema}')
+        count = t.count().execute()
+        rows.append({'Schema': schema, 'Table': table, 'Rows': f'{count:,}'})
+
+pd.DataFrame(rows).style.hide(axis='index')
+```
+
+## Data Integrity
+
+Grain columns (primary keys) must be non-null and unique. Foreign key columns must be non-null.
+
+```{python}
+from IPython.display import display
+from sqlmesh import Context
+from sqlglot import exp
+import pointblank as pb
+
+ctx = Context(paths=['.'])
+con = get_connection()
+
+for fqn in sorted(ctx.models):
+    model = ctx.models[fqn]
+    if not hasattr(model, 'grain') or not model.grain:
+        continue
+
+    parts = str(fqn).replace('"', '').split('.')
+    schema, table = parts[-2], parts[-1]
+    if schema not in ('silver', 'gold'):
+        continue
+
+    tbl = con.table(table, database=f'my_lakehouse.{schema}')
+
+    grain_cols = []
+    for col in model.grain:
+        grain_cols.append(col.name if isinstance(col, exp.Column) else col.alias_or_name)
+
+    ref_cols = []
+    for ref in getattr(model, 'references', []):
+        col_name = ref.this.name if isinstance(ref, exp.Alias) else ref.name
+        if col_name not in grain_cols:
+            ref_cols.append(col_name)
+
+    v = pb.Validate(data=tbl, tbl_name=f'{schema}.{table}', label=f'{schema}.{table}')
+    for col in grain_cols:
+        v = v.col_vals_not_null(columns=col)
+    v = v.rows_distinct(columns_subset=grain_cols)
+    for col in ref_cols:
+        v = v.col_vals_not_null(columns=col)
+
+    display(v.interrogate())
+```
+
+## Entity Relationships
+
+```{python}
+from IPython.display import Markdown
+from sqlmesh import Context
+from sqlglot import exp
+
+ctx = Context(paths=['.'])
+
+entities = {}
+fk_edges = []
+
+for fqn in sorted(ctx.models):
+    model = ctx.models[fqn]
+    parts = str(fqn).replace('"', '').split('.')
+    schema, table = parts[-2], parts[-1]
+    if schema not in ('silver', 'gold'):
+        continue
+
+    grain_cols = []
+    if hasattr(model, 'grain') and model.grain:
+        for col in model.grain:
+            grain_cols.append(col.name if isinstance(col, exp.Column) else col.alias_or_name)
+
+    entities[f'{schema}.{table}'] = grain_cols
+
+    for ref in getattr(model, 'references', []):
+        if isinstance(ref, exp.Alias):
+            fk_col = ref.this.name
+            target_entity = ref.alias
+        else:
+            fk_col = ref.name
+            target_entity = ref.name
+        for other_fqn, other_model in ctx.models.items():
+            other_parts = str(other_fqn).replace('"', '').split('.')
+            other_schema, other_table = other_parts[-2], other_parts[-1]
+            if other_schema not in ('silver', 'gold') or not hasattr(other_model, 'grain') or not other_model.grain:
+                continue
+            other_grain = [
+                (c.name if isinstance(c, exp.Column) else c.alias_or_name)
+                for c in other_model.grain
+            ]
+            if target_entity in other_grain:
+                fk_edges.append((f'{schema}.{table}', fk_col, f'{other_schema}.{other_table}'))
+                break
+
+
+def _eid(name: str) -> str:
+    return name.upper().replace('.', '_')
+
+
+lines = ['erDiagram']
+for entity, grain_cols in entities.items():
+    lines.append(f'    {_eid(entity)} {{')
+    for col in grain_cols:
+        lines.append(f'        string {col} PK')
+    lines.append('    }')
+
+seen_edges = set()
+for from_model, fk_col, to_model in fk_edges:
+    edge = (_eid(from_model), _eid(to_model))
+    if edge not in seen_edges:
+        lines.append(f'    {_eid(to_model)} ||--o{{ {_eid(from_model)} : "{fk_col}"')
+        seen_edges.add(edge)
+
+display(Markdown(f'```{{mermaid}}\n' + '\n'.join(lines) + '\n```'))
+```
