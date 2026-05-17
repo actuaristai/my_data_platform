@@ -8,7 +8,7 @@ format:
 jupyter: my_data_platform
 echo: false
 execute:
-  freeze: auto
+  freeze: true
 ---
 
 ## Executive Summary
