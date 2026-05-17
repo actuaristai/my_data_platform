@@ -116,8 +116,4 @@ clean:
     Get-ChildItem -Path . -Filter "__pycache__" -Recurse -Directory | Remove-Item -Recurse -Force
 
 duckdb:
-    #!{{POWERSHELL_SHEBANG}}
-    $tmp = New-TemporaryFile
-    "ATTACH 'ducklake:data/catalog.ducklake' AS my_lakehouse;" | Set-Content $tmp
-    uvx --from duckdb-cli duckdb.exe -ui -init $tmp
-    Remove-Item $tmp
+    uvx --from duckdb-cli duckdb.exe -ui -init scripts/duckdb_init.sql
