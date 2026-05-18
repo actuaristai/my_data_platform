@@ -70,6 +70,10 @@ docs: _docs-build
 
 # --- Init (run once after cloning) ---
 
+# Create MotherDuck state database (run once; requires MOTHERDUCK_TOKEN)
+init-motherduck:
+    uv run python -c "import duckdb; con = duckdb.connect('md:?motherduck_token=' + __import__('os').environ['MOTHERDUCK_TOKEN']); con.execute('CREATE DATABASE IF NOT EXISTS sqlmesh_state')"
+
 init-project: init-env init-pre-commit
     New-Item -ItemType Directory -Force -Path data/01_raw, data/02_bronze, data/03_silver, data/04_gold, data/storage, data/pins_board | Out-Null
 
